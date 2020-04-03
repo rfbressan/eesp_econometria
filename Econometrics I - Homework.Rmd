@@ -1,0 +1,26 @@
+---
+title: "Homework - Econometrics I"
+author: "Rafael Felipe Bressan"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    highlight: espresso
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Angrist and Evans (1998) consider two different instrumental variables to estimate the causal effects of family size on parents’ labor supply.
+
+1. Explain why it would be important to have a valid instrument in this case. You expect that OLS would be biased in which direction?
+
+2. Put yourself in the shoes of the authors of the paper. How would you justify the validity of each of these two instrumental variables?
+
+3. Now put yourself in the shoes of a referee evaluating the paper. Discuss different potential threats to the validity of these instruments.
+
+4. Discuss how the importance of the threats you discussed in the previous item might vary if you consider the same instruments for different countries or different years.
+
+5. Select a country and a census year from [IPUMS](https://international.ipums.org/international/index.shtml). Estimate the effects of family size on parents’ labor supply using this sample. Each student should choose a different sample. Once you select your sample, sign up in the google doc to guarantee no one else is using the same sample [(link)](https://docs.google.com/spreadsheets/d/1tI9acQk0LdPMhXMwQoVlOex1fnxsqmf8-anfytZoZgc/edit?usp=sharing). Submit a well-polished table with the results. Analyse how your results differ from Angrist and Evans (1998). Submit your codes in an appendix.
+
+6. Using the data from the previous item, how could you provide evidence in favor and/or against the validity of the instruments?
