@@ -1,0 +1,104 @@
+---
+title: "Problem Set 3 - Econometrics I"
+subtitle: São Paulo School of Economics - FGV/EESP
+author: 
+  - "Student: Rafael Felipe Bressan" 
+  - "Professor: Bruno Ferman"
+date: "`r Sys.Date()`"
+output: 
+  bookdown::html_book:
+    highlight: espresso
+    toc: false
+    number_sections: false
+bibliography: "econometrics.bib"
+biblio-style: "apalike"
+link-citations: true
+---
+
+```{r setup, include=FALSE, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(haven)
+library(sandwich)
+library(AER)
+library(broom)
+library(kableExtra)
+library(stargazer)
+library(tidyverse)
+```
+
+## Question 5
+
+During the 1880s, a cartel known as the Joint Executive Committee (JEC) controlled the rail transport of grain from the Midwest to eastern cities in the United States. The cartel preceded the Sherman Antritrust Act of 1890, and it legally operated to increase the price of grain transportation above what would have been the competitive price. From time to time, cheating by members of the cartel brought about a temporary collapse of the collusive price-setting agreement. In this exercise, you will use variations in supply associated with the cartel’s collapses to estimate the elasticity of demand for rail transport of grain. We will use a data file JEC.dta that contains weekly observations on the rail shipping price and other factors from 1880 to 1886. So, our main goal is to estimate the elasticity of demand for rail shipping of grain. In particular, we wish to regress $\ln(Q_i)$ where $Q_i$ is the total tonnage of grain shipped in week $i$, on $\ln(P_i)$, where $P_i$ is the price of shipping a ton of grain by rail.
+
+(a) Estimate the price elasticity of demand by using OLS to regress the log of the quantity of grain shipped on the log of the price and the full set of monthly binary indicators. What is the estimated value of the demand elasticity and its standard error?
+
+Loading Dataset
+
+```{r load, cache=TRUE}
+JEC <- read_dta("JEC.dta")
+data_red <- data.frame(ln_price = log(JEC$price), 
+                       ln_quantity = log(JEC$quantity), 
+                       JEC[,5:16])
+```
+
+OLS Regression
+
+```{r ols-reg, results = "asis"}
+reg_ols <-  lm(ln_quantity ~ . , data = data_red)
+se_ols <- sqrt(diag(vcovHC(reg_ols, type = "HC1")))
+
+stargazer(reg_ols, type = "html", header = FALSE,
+          label = "tab:table1",
+          title = "OLS estimation.",
+          # dep.var.caption = "",
+          dep.var.labels = "Log-quantity",
+          #covariate.labels = c("same sex", "constant"),
+          report = "vcs",
+          se = list(se_ols),
+          omit.stat = c("rsq", "adj.rsq", "ser"),
+          omit.table.layout = "n",
+          omit = "seas*"
+          #notes = notes6,
+          #notes.append = FALSE
+          )
+```
+
+(b) Explain why the interaction of supply and demand could make the OLS estimator of the elasticity obtained in (a) biased.
+
+(c) Consider using the variable cartel as instrumental variable for $\ln(P)$. Use economic reasoning to argue whether cartel plausibly satisfies the two conditions for a valid instrument.
+
+Including the cartel data on the data set
+
+```{r cartel}
+data_red$cartel <- JEC$cartel
+```
+
+Estimating the IV regression
+
+```{r iv-reg, results='asis'}
+reg_iv <- ivreg(ln_quantity ~ ln_price + . - cartel | . - ln_price + cartel,
+                data = data_red)
+se_iv <- sqrt(diag(vcovHC(reg_iv, type = "HC1")))
+
+stargazer(reg_iv, reg_ols, type = "html", header = FALSE,
+          label = "tab:table2",
+          title = "IV and OLS estimation compared.",
+          # dep.var.caption = "",
+          dep.var.labels = "Log-quantity",
+          #covariate.labels = c("same sex", "constant"),
+          report = "vcs",
+          se = list(se_iv, se_ols),
+          omit.stat = c("rsq", "adj.rsq", "ser"),
+          omit.table.layout = "n",
+          omit = "seas*"
+          #notes = notes6,
+          #notes.append = FALSE
+          )
+```
+
+(d) Test, at 5% significance level, the hypothesis that the demand for rail shipping of grain is inelastic.
+
+(e) Test, at 5% significance level, the hypothesis that the demand elasticity is equal to −1. What is the p-value of this test?
+
+(f) One of the reasons for price fluctuations was that the Great Lakes periodically froze, making shipping grain by boat impossible and temporarily increasing the demand for rail. Ice i is a binary variable that is equal to 1 if the Great Lakes are not navigable because of ice. Consider using the variable Ice as instrumental variable for $\ln(P)$. Use economic reasoning to argue whether Ice plausibly satisfies the two conditions for a valid instrument to estimate demand elasticity for rail shipping of grain.
+
