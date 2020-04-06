@@ -162,3 +162,98 @@ kable(df, format = "html",
 $Ice_i$ is actually a demand shifter and should be included in the demand equation. This exogenous variable would help to estimate the parameters from _supply equation_, but would be of no use as an instrument of price when estimating the demand equation.
 
 Eventhough $Ice_i$ is clearly correlated to price, this is a result of its direct impact on quantity demanded and thus the exclusion hypothesis is not satisfied.
+
+## Question 6
+
+**In this exercise, we will study the impact of eminent domain on house prices in the US^1 . Eminent domain (or taking laws) is the legal mechanism through which a government can compulsorily purchase private property. This action is surely controversial, and proprietors can take legal action in order to try to revert such a decision. Federal court rulings declaring that a government takeover was unlawful (pro-plaintiff decisions) uphold property rights and set a precedent that makes future exercise of eminent domain more difficult. Our analysis will thus centre on the impact of pro-plaintiff rulings in federal circuits 2 on housing prices.**
+
+**(a) Import temp `CSHomePrice.mat.csv`. This dataset stores information on house prices (Case-Shiller index) and pro-plaintiff rulings per circuit and period. Note that, except for the log CS index, all data is on a yearly frequency. Aggregate the dataset by year, taking the within-circuit-year average of the log price index.**
+
+Loading the dataset and aggreting it by circut/year.
+
+```{r load-cs, message=FALSE, cache=TRUE}
+CS_home_price <- read_csv("temp_CSHomePrice.mat.csv")
+
+# aggregate by year
+cs_year <- CS_home_price %>% 
+  group_by(circuit, year) %>% 
+  summarise_all(mean)
+```
+
+**(b) Run a regression of the log-price index on the total number of pro-plaintiff appellate taking decisions (`numpro_casecat_12`). What do you find? Does this coefficient have a causal interpretation? Why?**
+
+```{r reg1, results="asis"}
+reg1 <- lm(logpriceindex ~ numpro_casecat_12, data = cs_year)
+vcov_reg1 <- vcovHC(reg1, type = "HC1")
+se_reg1 <- sqrt(diag(vcov_reg1))
+
+notes1 <- "Robust standard error in parenthesis."
+stargazer(reg1, type = "html", header = FALSE,
+          label = "tab:table1",
+          title = "OLS estimate of Case-Shiller home price index.",
+          dep.var.caption = "",
+          dep.var.labels = "log(price index)",
+          covariate.labels = c("pro-plantiff", "Intercept"),
+          report = "vcs",
+          se = list(se_reg1),
+          omit.stat = c("rsq", "ser"),
+          omit.table.layout = NULL,
+          notes = notes1,
+          notes.append = FALSE)
+```
+
+blalblabla
+
+**To deal with potential endogeneity, Chen and Yeh (2015) explore the fact that, in federal appellate courts, judges are randomly assigned to three-judge panels to decide appellate cases. Each Circuit Court case receives three _randomly_ assigned judges out of a pool of judges, numbering roughly 8 to 40 depending on the size of the Circuit. Therefore, conditional on the pool characteristics, the realized characteristics of the randomly assigned three-judge panels should satisfy the exclusion restriction, as they can only be related to property prices through the judges’ decisions.**
+
+
+
+**(c) Match dataset `probs.txt` to your data. This dataset stores the distribution of characteristics in each circuit pool from 1945 to 2007.**
+
+```{r probs, message=FALSE, cache=TRUE}
+probs <- read_table2("probs.txt")
+
+# Merge two datasets by left join cs_year and probs.
+# Select the appropriate variables for next questions
+cs_probs <- cs_year %>% 
+  ungroup() %>% 
+  left_join(probs, by = c("circuit" = "Scircuit", "year" = "Syear")) %>% 
+  select(logpriceindex, numpro_casecat_12, missing_cy_12, numcasecat_12, 
+         numpanels1x_dem, starts_with("prob"), -starts_with("prob_x"))
+```
+
+**(d) We propose to run the following model:**
+
+$$\ln(Case\_Shiller)_{ct} = \beta_0 + \beta_1 numpro\_casecat\_12_{ct} + \gamma'W_{ct} +  \epsilon_{ct}$$
+
+**where $W_{ct}$ includes the full set of controls for judicial pool characteristics; a dummy for whether there were no cases in that circuit-year (`missing_cy_12`), and the number of takings appellate decisions (`numcasecat_12`). As an instrument, we choose the number of panels with at least one Democrat (`numpanels1x_dem`).**
+
+**Estimate the above model using the proposed instrument. Does the instrument satisfy the relevance assumption? Comment your estimates.**
+
+```{r iv, results = "asis"}
+ols_reg <- lm(logpriceindex ~ numpro_casecat_12+missing_cy_12+numcasecat_12+.-numpanels1x_dem,
+              data = cs_probs)
+iv_reg <- ivreg(logpriceindex ~ numpro_casecat_12+missing_cy_12+numcasecat_12+.-numpanels1x_dem |
+                  numpanels1x_dem+missing_cy_12+numcasecat_12+.-numpro_casecat_12,
+                data = cs_probs)
+vcov_iv <- vcovHC(iv_reg, type = "HC1")
+se_iv <- sqrt(diag(vcov_iv))
+
+notes2 <- "Robust standard error in parenthesis."
+stargazer(coeftest(iv_reg), ols_reg, type = "html", header = FALSE,
+          label = "tab:table2",
+          title = "IV estimate of Case-Shiller home price index.",
+          dep.var.caption = "",
+          dep.var.labels = "log(price index)",
+          covariate.labels = c("pro-plantiff", "missing", "numcasecat",
+                               "Intercept"),
+          report = "vcs",
+          se = list(se_iv, NULL),
+          omit = c("prob_*"),
+          omit.stat = c("rsq", "ser"),
+          omit.table.layout = NULL,
+          notes = notes2,
+          notes.append = FALSE)
+```
+
+**(e) Do you think the coefficient found in (d) is a credible estimate of the causal effect we set ourselves to analyse? Why? If the answer is negative, could you use the data available and run an alternative specification that would produce more credible estimates? What did you find?**

@@ -67,6 +67,8 @@ Male children have poorer health at birth and thus mothers with two boys are mor
 
 The threat of _twins-2_ be an invalid instrument seems to be more relevant as the time passes, since modern families structure are going towards households with children from different parents marriages living under the same roof ever more common. Fertility treatments are now common place and many women postpone childbearing in favor of developing their professional careers. When they decide to have a child, the age factor might influence in the necessity of fertility treatment and thus raising the probability of having twins. Especially on the Western cultures, this seems to be affecting almost all countries. For other religion/culture countries we lack information about this topic and cannot make any assertion.
 
+Public policies that provide incentives to give birth or otherwise, like China.
+
 TODO: ARGUMENT ABOUT SAME SEX.
 
 **5. Select a country and a census year from [IPUMS](https://international.ipums.org/international/index.shtml). Estimate the effects of family size on parents’ labor supply using this sample. Each student should choose a different sample. Once you select your sample, sign up in the google doc to guarantee no one else is using the same sample [(link)](https://docs.google.com/spreadsheets/d/1tI9acQk0LdPMhXMwQoVlOex1fnxsqmf8-anfytZoZgc/edit?usp=sharing). Submit a well-polished table with the results. Analyse how your results differ from @Angrist1998 . Submit your codes in an appendix.**
