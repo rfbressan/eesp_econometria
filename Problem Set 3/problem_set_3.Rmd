@@ -6,10 +6,12 @@ author:
   - "Professor: Bruno Ferman"
 date: "`r Sys.Date()`"
 output: 
-  bookdown::html_book:
-    highlight: tango
+  bookdown::pdf_book:
+    highlight: espresso
     toc: false
     number_sections: false
+header-includes:
+  - \usepackage{cancel}
 bibliography: "econometrics.bib"
 biblio-style: "apalike"
 link-citations: true
@@ -17,6 +19,243 @@ link-citations: true
 
 ```{r setup, include=FALSE, message=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(haven)
+library(sandwich)
+library(AER)
+library(car)
+library(broom)
+library(kableExtra)
+library(stargazer)
+library(tidyverse)
+```
+
+## Question 1
+
+You are interested in estimating $\beta$ in the following regression:
+
+$$y_i=\alpha+\beta x_i+\epsilon_i,$$
+
+where $\mathbb{E}[x_iu_i]\neq0$. Since you observe a binary instrumental variable $(z_i \in \{0, 1\}$ for any $i \in \{1, \ldots, N\})$ that is relevant $(\mathbb{E}[z_ix_i]\neq 0)$ and valid $(\mathbb{E}[z_iu_i] = 0)$, you can consistently estimate $\beta$ using the IV estimator,
+
+$$\hat{\beta}_{IV} = \frac{[\sum^n_{i=1}(z_i - \bar{z})(y_i - \bar{y})]}{[\sum_{i=1}^n(z_i - \bar{z})(x_i - \bar{x})]},$$
+
+the 2SLS estimator,
+
+$$\hat{\beta}_{2SLS} = \frac{[\sum_{i=1}^{n}(z_i - \bar{z})(x_1 - \bar{x})][\sum_{i=1}^n(z_i - \bar{z})]^{-1}[\sum^n_{i=1}(z_i - \bar{z})(y_i - \bar{y})]}{[\sum_{i=1}^{n}(z_i - \bar{z})(x_1 - \bar{x})][\sum_{i=1}^n(z_i - \bar{z})]^{-1}[\sum_{i=1}^n(z_i - \bar{z})(x_i - \bar{x})]},$$
+
+or the Wald estimator,
+
+$$\hat{\beta}_{W} = \frac{\frac{1}{N_1}\sum_{i|z_i = 1} y_i - \frac{1}{N_0}\sum_{i|z_i = 0} y_i }{\frac{1}{N_1}\sum_{i|z_i = 1} x_i - \frac{1}{N_0}\sum_{i|z_i = 0} x_i},$$
+
+where $\bar{y_1}=\frac{\sum_{i|z_i=1}y_i}{N_1}, \bar{y_0}=\frac{\sum_{i|z_i=0}y_i}{N_0}, \bar{x_1}=\frac{\sum_{i|z_i=1}x_i}{N_1}, \bar{x_0}=\frac{\sum_{i|z_i=0}x_i}{N_0}, N_1$ is the number of units whose instrumental variable assumes the value of 1 and $N_0$ is the number of units whose instrumental variable assumes the value of 0.
+
+Show that those three estimators are numerically equal.
+
+$\hat{\beta_{2SLS}}$ is clearly equal to $\hat{\beta_{IV}}$ since terms cancel out. Let's show that $\hat{\beta_{IV}}$ is identical to Wald. Take only the numerator of $\hat{\beta_{IV}}$ and expand it:
+
+\begin{align*}
+    \sum_{i=1}^{N}(z_i-\bar{z})(y_i-\bar{y})&=\sum_{i=1}^{N}(z_iy_i-z_i\bar{y}-\bar{z}y_i+\bar{z}\bar{y})\\
+    &=\sum_{i=1}^{N}z_iy_i -N\bar{z}\bar{y}\\
+    &=\sum_{i|z_i=1}^{N_1}y_i-N\bar{z}\bar{y}
+\end{align*}
+
+Let $p = N_1 / N$, $1-p = N_0 / N$ and notice that $N_1(1-p) = N_0p = K$. Also, $\bar{z}=p$ and we can write:
+
+$$\bar{y}=\frac{1}{N}(\sum_{i|z_i=0}^{N_0}y_i + \sum_{i|z_i=1}^{N_1}y_i)$$ 
+
+then:
+
+\begin{align*}
+    \sum_{i=1}^{N}(z_i-\bar{z})(y_i-\bar{y})&=N_1\bar{y_1}-p(N_0\bar{y_0}+N_1\bar{y_1})\\
+    &=K(\bar{y_1}-\bar{y_0})
+\end{align*}
+
+Take the same steps for the denominator and reach the result $K(\bar{x_1}-\bar{x_0})$ and thus:
+
+\begin{align*}
+    \hat{\beta_{IV}}=\frac{\sum^n_{i=1}(z_i - \bar{z})(y_i - \bar{y})}{\sum_{i=1}^n(z_i - \bar{z})(x_i - \bar{x})}&=\frac{K(\bar{y_1}-\bar{y_0})}{K(\bar{x_1}-\bar{x_0})}\\
+    &=\frac{(\bar{y_1}-\bar{y_0})}{(\bar{x_1}-\bar{x_0})} = \hat{\beta_{W}}
+\end{align*}
+
+## Question 2
+
+**You are interested in estimating $\beta$ in the following regression:**
+
+$$y_i=\alpha+\beta x_i+u_i,$$
+
+
+**Where $\mathbb{E}[x_iu_i]\neq 0$. You also observe a random variable $z_i$ such that it is relevant, $\mathbb{E}[z_ix_i]\neq 0$, but not valid as an instrument, $\mathbb{E}[z_iu_i]\neq 0$. You decide to estimate:**
+
+$$\hat{\beta}_{OLS}=\frac{\sum_{i=1}^N{(x_i-\bar{x})(y_i-\bar{y})}}{\sum_{i=1}^N(x_i-\bar{x})^2}, $$
+
+**and**
+
+$$\hat{\beta}_{IV}=\frac{\sum_{i=1}^N{(z_i-\bar{z})(y_i-\bar{y})}}{\sum_{i=1}^N{(z_i-\bar{z})(x_i-\bar{x})}}. $$
+
+**We want to derive conditions under which the OLS estimator may be a better option than the IV estimator.**
+
+**(a) Show that the asymptotic bias of the OLS estimator is given by**
+
+$$plim(\hat{\beta}_{OLS})-\beta=corr(x_i,u_i)\times\frac{\sigma_u}{\sigma_x}$$
+
+First of all we can work with demeaned equation such that we can redefine $x_i:=x_i-\bar{x}$, $y_i:=y_i-\bar{y}$ and $z_i:=z_i-\bar{z}$. Thus our OLS estimator is given by:
+
+
+\begin{align*}
+\hat{\beta}_{OLS}&=\frac{\sum_{i=1}^N{x_iy_i}}{\sum_{i=1}^Nx_i^2}\\
+&=\beta +\frac{\sum_{i=1}^N{x_iu_i}}{\sum_{i=1}^Nx_i^2}
+\end{align*}
+
+
+and knowing that $corr(x_i, u_i)=cov(x_i,u_i)\sigma_x\sigma_u$, we have the following asymptotic result:
+
+
+\begin{align*}
+plim(\hat{\beta}_{OLS})-\beta&=\frac{cov(x,u)}{\sigma_x^2}\\
+&=corr(x,u)\times\frac{\sigma_u}{\sigma_x}
+\end{align*}
+
+
+**(b) Show that the asymptotic bias of the IV estimator is given by**
+
+$$plim(\hat{\beta}_{OLS})-\beta=\frac{corr(z_i,u_i)}{corr(z_i,x_i)}\times\frac{\sigma_u}{\sigma_x}$$
+
+Our $\hat{\beta_{IV}}$ will be given by:
+
+\begin{align*}
+\hat{\beta}_{IV}&=\frac{\sum_{i=1}^Nz_iy_i}{\sum_{i=1}^Nz_ix_i}\\
+&=\beta+ \frac{\sum_{i=1}^Nz_iu_i}{\sum_{i=1}^Nz_ix_i}
+\end{align*}
+
+
+and asymptotically we have that:
+
+
+\begin{align*}
+plim(\hat{\beta}_{IV})-\beta&=\frac{cov(z,u)}{cov(z,x)}\\
+&=\frac{corr(z,u)\sigma_z\sigma_u}{corr(z,x)\sigma_z\sigma_x}\\
+&=\frac{corr(z,u)}{corr(z,x)}\times\frac{\sigma_u}{\sigma_x}
+\end{align*}
+
+**(c) When is the OLS estimator preferred to the IV estimator in terms of bias? Is this condition easier to hold when the instrument is weak, i.e., when there is a small correlation between the instrumental variable and the endogenous variable?**
+
+OLS would be preferred to IV if $|corr(x,u)|<|\frac{corr(z,u)}{corr(z,x)}|$. If the instrument is weak, $corr(z,x)\rightarrow 0$ making it unlikely that IV would result in lower bias. In this case one should be sure the instrument is valid, that is, $corr(z,u)=0$. Otherwise OLS might be a better (less bad) choice.
+
+## Question 3
+
+**Consider a simple time series model under the assumption that the assumption that the independent variable presents classical measurement error:**
+
+$$y_t=\alpha+\beta x_t^*+u_t$$
+
+$$x_t=x_t^*+e_t$$
+
+**where $u_t$ is serially non-correlated, has zero mean and it is non-correlated with $x_t^*$ and $e_t$. We only observe $y_t$ and $x_t$. Assume that $e_t$ is serially non-correlated, has zero mean and it is non-correlated with $x_t^*$. In order to simplify the algebra, assume that $x_t^*$ has zero mean.**
+
+**(a) Write $x_t^*=x_t-e_t$ and plug it in your main equation. Show that the error term in the new equation, $v_t$, is negatively correlated with $x_t$ if $\beta >0$. Under those assumption, is the OLS estimator of $\beta$ consistent?**
+
+
+\begin{align*}
+y_t&=\alpha+\beta (x_t-e_t)+u_t\\
+&=\alpha+\beta x_t+\underbrace{u_t-\beta e_t}_{v_t}\\
+\end{align*}
+
+
+Now we can compute $\mathbb{E}[x_t v_t]$, but first notice that $\mathbb{E}[x_te_t]=\sigma_e^2$, and then:
+
+
+\begin{align*}
+\mathbb{E}[x_tv_t]&=cov(x_t, v_t), \quad \text{since both have zero mean}\\
+&=cov(x_t,u_t-\beta e_t)\\
+&=\cancelto{0}{cov(x_t, u_t)}-\beta cov(x_t, e_t)\\
+&=-\beta\sigma_e^2
+\end{align*}
+
+Since $\sigma_e^2 > 0$, then the correlation of $x_t$ to $v_t$ is negative if $\beta$ is positive. OLS is not consistent in this case because the regressor is correlated to the error term and the resulting asymptotic bias is $plim(\hat{\beta_{ols}}-\beta)=\frac{-\beta\sigma_e^2}{\sigma_x^2}$.
+
+**(b) Assume also that $u_t$ and $e_t$ are non-correlated with all the past values of $x_t^*$ and $e_t$. Show that $\mathbb{E}[x_{t-1}v_t]=0$.**
+
+We have that $x_{t-1}=x_{t-1}^*+e_{t-1}$ and thus $\mathbb{E}[x_{t-1}v_t] = \mathbb{E}[x_{t-1}^*-\beta e_tx_{t-1}^*+e_{t-1}u_t-\beta e_{t-1}e_t]=0$, since all expectations are assumed to be zero.
+
+**(c) Is it reasonable to believe that $x_t$ and $x_{t-1}$ are correlated? Explain with examples.**
+
+The correlation of $x_t$ and $x_{t-1}$ comes from the correlation of $x_t^*$ and $x_{t-1}^*$, thus if we have a strong belief this is the case, then it is reasonable to think $x_t$ and $x_{t-1}$ are correlated. This is the case of any time series that presents autocorrelation in its data generating process. While this is not very common in prices of financial assets, this autocorrelation is easily found in macroeconomic series like GDP, inflation, interest rates, unemployment, etc. 
+
+**(d) How can you consistently estimate $\beta$ according to the discussion in the previous items?**
+
+As long as $x_t$ and $x_{t-1}$ are correlated and we have that $x_{t-1}$ is not correlated to the error term, $v_t$, then $x_{t-1}$ may be used as an instrument to $x_{t}$. The IV estimator will be consistent for $\beta$.
+
+## Question 4
+
+**We are interested in the regression of log wages, $y_i$, on the years of schooling, $s_i$, while controlling for ability, $a_i$. We can write this:**
+
+$$y_i = \alpha + \rho s_i + \gamma a_i + \epsilon_i$$
+
+**where the population regression coefficients $\alpha , \rho , \gamma$ are defined such as $\epsilon_i$ is uncorrelated with $s_i$ and $a_i$.**
+
+**(a) Suppose you estimate a bivariate regression of $y_i$ on $s_i$ instead. Derive the bivariate OLS coefficient. This coefficient converges in probability to what? When does the short-regression gives you the coefficient $\rho$ from the long regression?**
+
+This is a case where we are running OLS with a omitted variable and hence there is gonna exist a bias in our estimate. Our OLS estimator in this case can be written as:
+
+
+\begin{align*}
+\hat{\rho}_{short}=\rho+\gamma\frac{\sum s_ia_i}{\sum s_i^2}+\frac{\sum s_i\epsilon_i}{\sum s_i^2}\\
+plim(\hat{\rho}_{short})=\rho+\gamma\frac{cov(s,a)}{var(s)}
+\end{align*}
+
+Knowing that $\hat{\rho_{long}}\stackrel{p}{\rightarrow}\rho$, then $\hat{\rho}_{short}$ will be equal to the true parameter if either $\gamma = 0$ or $cov(s,a)=0$, but since we are dealing with sample estimations, the sample counterparts, $\hat{\gamma}$ or $\widehat{cov}(s,a)$ must be zero.
+
+**(b) Why is the long regression more likely to have a causal interpretation? Or is it?**
+
+The long regression is more likely to have a causal interpretation because **after** controlling for ability, it's more likely that years of schooling is randomly assigned and thus elimating selection bias within each group defined by ability. But we need to be aware that, for this to be true, we have to control for *every* variable that may have a relation to wage, otherwise, without an explicity randomization on the regressor, we cannot guarantee a causal interpretation.
+
+**In general, we are not able to control for ability... In a 1991 article, Joshua Angrist and Alan Krueger used children’s season of birth as an instrumental variable for years of completed schooling to solve this problem. Their idea is as follows: U.S. children born in the fall of the calendar year typically enter school (first grade) shortly after they turn six - that is, in September of their sixth year of life. Children born the following winter, however (just a few months later), must delay the start of school for a full calendar relative to those born the prior fall. The reason: those born in winter are roughly 5 years and 9 months old in the September of their sixth calendar year - which is too young to enter first grade. These children therefore typically enter the first grade when they are approximately six years and nine months of age. Since U.S. law prevents children from dropping out of school before age 16, children born in the winter are required to complete fewer years of schooling than children born in the fall. Putting these pieces together, comparing winter versus fall births can potentially serve as an instrumental variable for analyzing the causal effect of schooling on earnings. Sounds crazy, right? But see the two figures below from their paper.**
+
+
+**(c) Call $Z$ the instrumental variable, where $Z = 1$ means that a child was born in the winter and $Z = 0$ means that a child was born in the fall.**
+
+**(c.1) What are the two conditions necessary for Z to be a valid instrumental variable for assessing the causal effect of years of schooling on earnings?**
+
+i) _instrument relevance_: $corr(z, x)\neq 0$. The instrument must be correlated to years of schooling. This seems a plausible assumption and can be tested. Figure I is making this case.
+
+ii) _exclusion restriction_: $corr(z,e)=0$. The instrument must not be correlated to the error term, in other words, $Z$ cannot be correlated to any unobserved variables, including ability. This is not testable and we must rely on good reasoning. Since date of birth is not likely to have any influence on ability, it is a plausible assumption.
+
+**(c.2) Which of these conditions is testable, and how would you test it?**
+
+Only the relevance is testable. Compute the sample covariance and test it against an alternative hypothesis this covariance is not equal to zero.
+
+**(d) You have compiled the following data:**
+
+\begin{table}[h]
+\centering
+\begin{tabular}{l|llll}
+       & Winter birth (Z=1) & Fall birth (Z=0) &  &  \\
+       \hline
+E(s|Z) & 12.4         & 12.6       &  &  \\
+E(w|z) & \$41,300     & \$42,100   &  &  
+\end{tabular}
+\end{table}
+
+**(d.1) What is your estimate of the causal effect of being born in Winter versus Fall on average years of completed schooling? Using the IV terminology, how do you call that?**
+
+$\bar{s}_1-\bar{s}_0=\mathbb{E}[s|Z=1]-\mathbb{E}[s|Z=0]=-0.2$
+
+This is first stage estimate, $\hat{\delta}$ of $s_i=\delta_0+\delta Z_i+u_i$.
+
+**(d.2) What is your estimate of the causal effect of being born in Winter versus Fall on average earnings? Using the IV terminology, how do you call that?**
+
+$\bar{w}_1-\bar{w}_0=\mathbb{E}[w|Z=1]-\mathbb{E}[w|Z=0]=-800$
+
+This is the reduced form estimate, $\hat{\pi}$ of $w_i=\pi_0+\pi Z_i+v_i$
+
+**(d.3) Show that for a binary instrument, your instrumental variable estimator is the same as the ratio of two comparisons of means. What is your IV estimate of the causal effect of one year of education on earnings in this case?**
+
+$$\hat{\beta}_{IV}=\frac{\bar{w}_1-\bar{w}_0}{\bar{s}_1-\bar{s}_0}=4000$$
+
+We have shown that $\hat{\beta}_{IV}=\hat{\beta}_{Wald}$ when the instrument is a binary variable in question 1.
+
+For the following two questions you will need to have installed and load these libraries in R.
+
+```{r libraries, eval = FALSE}
 library(haven)
 library(sandwich)
 library(AER)
@@ -53,8 +292,8 @@ The OLS regression model is:
 reg_ols <-  lm(ln_quantity ~ . , data = data_red)
 se_ols <- sqrt(diag(vcovHC(reg_ols, type = "HC1")))
 
-stargazer(reg_ols, type = "html", header = FALSE,
-          label = "tab:table1",
+stargazer(reg_ols, type = "latex", header = FALSE,
+          label = "tab:q5table1",
           title = "OLS estimation.",
           dep.var.caption = "",
           dep.var.labels = "Log-quantity",
@@ -92,19 +331,15 @@ reg_iv <- ivreg(ln_quantity ~ ln_price + . - cartel | . - ln_price + cartel,
                 data = data_red)
 se_iv <- sqrt(diag(vcovHC(reg_iv, type = "HC1")))
 
-stargazer(reg_iv, reg_ols, type = "html", header = FALSE,
-          label = "tab:table2",
+stargazer(reg_iv, reg_ols, type = "latex", header = FALSE,
+          label = "tab:q5table2",
           title = "IV and OLS estimation compared.",
-          # dep.var.caption = "",
           dep.var.labels = "Log-quantity",
-          #covariate.labels = c("same sex", "constant"),
           report = "vcs",
           se = list(se_iv, se_ols),
           omit.stat = c("rsq", "adj.rsq", "ser"),
           omit.table.layout = "n",
           omit = "seas*"
-          #notes = notes6,
-          #notes.append = FALSE
           )
 ```
 
@@ -136,7 +371,7 @@ test1 <- ttest(reg_iv, 2, -1, unilateral = TRUE)
 
 Our t-stat is `r test1$t_value` with a p-value of `r test1$p_value`.
 
-**(e) Test, at 5% significance level, the hypothesis that the demand elasticity is equal to −1. What is the p-value of this test?**
+**(e) Test, at 5\% significance level, the hypothesis that the demand elasticity is equal to -1. What is the p-value of this test?**
 
 We can use a asymptotic chi-squared Wald test for a linear restriction test, or the usual two-sided t-test.
 
@@ -149,7 +384,7 @@ df <- tribble(~Test,  ~Statistic, ~`p-value`,
               "t-test", test2_t$t_value, test2_t$p_value,
               "Wald", test2_chi$Chisq[2], test2_chi$`Pr(>Chisq)`[2])
 
-kable(df, format = "html",
+kable(df,
       digits = 4,
       booktabs = TRUE) %>% 
   kable_styling(full_width = FALSE,
@@ -188,12 +423,12 @@ vcov_reg1 <- vcovHC(reg1, type = "HC1")
 se_reg1 <- sqrt(diag(vcov_reg1))
 
 notes1 <- "Robust standard error in parenthesis."
-stargazer(reg1, type = "html", header = FALSE,
-          label = "tab:table1",
+stargazer(reg1, type = "latex", header = FALSE,
+          label = "tab:q6table1",
           title = "OLS estimate of Case-Shiller home price index.",
           dep.var.caption = "",
           dep.var.labels = "log(price index)",
-          covariate.labels = c("pro-plantiff", "Intercept"),
+          covariate.labels = c("pro-plaintiff", "Intercept"),
           report = "vcs",
           se = list(se_reg1),
           omit.stat = c("rsq", "ser"),
@@ -202,11 +437,11 @@ stargazer(reg1, type = "html", header = FALSE,
           notes.append = FALSE)
 ```
 
-blalblabla
+This coefficient does not have a causal interpretation. Chosen regressor is not randomized across all circuits and years and it is very likely that it reflects endogenous conditions we are not observing, for example the number of pro-plaintiff cases depends on total number of cases ruled in that circuit, which in turns may be related to the choice of local governments trying to expropriate private real state in order to set forth infrastructure projects. 
+
+The regression result turns out to be non-significant, thus, one could say that the number of pro-plaintiff cases has no relation to house prices.
 
 **To deal with potential endogeneity, Chen and Yeh (2015) explore the fact that, in federal appellate courts, judges are randomly assigned to three-judge panels to decide appellate cases. Each Circuit Court case receives three _randomly_ assigned judges out of a pool of judges, numbering roughly 8 to 40 depending on the size of the Circuit. Therefore, conditional on the pool characteristics, the realized characteristics of the randomly assigned three-judge panels should satisfy the exclusion restriction, as they can only be related to property prices through the judges’ decisions.**
-
-
 
 **(c) Match dataset `probs.txt` to your data. This dataset stores the distribution of characteristics in each circuit pool from 1945 to 2007.**
 
@@ -224,36 +459,75 @@ cs_probs <- cs_year %>%
 
 **(d) We propose to run the following model:**
 
-$$\ln(Case\_Shiller)_{ct} = \beta_0 + \beta_1 numpro\_casecat\_12_{ct} + \gamma'W_{ct} +  \epsilon_{ct}$$
+
+\begin{equation}
+\ln(Case\_Shiller)_{ct} = \beta_0 + \beta_1 numpro\_casecat\_12_{ct} + \gamma'W_{ct} +  \epsilon_{ct}
+(\#eq:case-shiller)
+\end{equation}
 
 **where $W_{ct}$ includes the full set of controls for judicial pool characteristics; a dummy for whether there were no cases in that circuit-year (`missing_cy_12`), and the number of takings appellate decisions (`numcasecat_12`). As an instrument, we choose the number of panels with at least one Democrat (`numpanels1x_dem`).**
 
 **Estimate the above model using the proposed instrument. Does the instrument satisfy the relevance assumption? Comment your estimates.**
 
 ```{r iv, results = "asis"}
-ols_reg <- lm(logpriceindex ~ numpro_casecat_12+missing_cy_12+numcasecat_12+.-numpanels1x_dem,
+controls <- gsub(" ", "+", 
+                "missing_cy_12 numcasecat_12 prob_1x_dem prob_2x_dem prob_3x_dem prob_1x_female prob_2x_female prob_3x_female prob_1x_nonwhite prob_2x_nonwhite prob_3x_nonwhite prob_1x_black prob_2x_black prob_3x_black prob_1x_jewish prob_2x_jewish prob_3x_jewish prob_1x_catholic prob_2x_catholic prob_3x_catholic prob_1x_noreligion prob_2x_noreligion prob_3x_noreligion prob_1x_instate_ba prob_2x_instate_ba prob_3x_instate_ba prob_1x_ba_public prob_2x_ba_public prob_3x_ba_public prob_1x_jd_public prob_2x_jd_public prob_3x_jd_public prob_1x_elev prob_2x_elev prob_3x_elev prob_1x_female_black prob_2x_female_black prob_3x_female_black prob_1x_female_noreligion prob_2x_female_noreligion prob_3x_female_noreligion prob_1x_black_noreligion prob_2x_black_noreligion prob_3x_black_noreligion prob_1x_female_jd_public prob_2x_female_jd_public prob_3x_female_jd_public prob_1x_black_jd_public prob_2x_black_jd_public prob_3x_black_jd_public prob_1x_noreligion_jd_public prob_2x_noreligion_jd_public prob_3x_noreligion_jd_public prob_1x_mainline prob_2x_mainline prob_3x_mainline prob_1x_evangelical prob_2x_evangelical prob_3x_evangelical prob_1x_protestant prob_2x_protestant prob_3x_protestant")
+
+ols_reg <- lm(paste0("logpriceindex ~ numpro_casecat_12+", controls),
               data = cs_probs)
-iv_reg <- ivreg(logpriceindex ~ numpro_casecat_12+missing_cy_12+numcasecat_12+.-numpanels1x_dem |
-                  numpanels1x_dem+missing_cy_12+numcasecat_12+.-numpro_casecat_12,
+iv_reg <- ivreg(paste0("logpriceindex ~ numpro_casecat_12+", controls, 
+                " | numpanels1x_dem+", controls),
                 data = cs_probs)
 vcov_iv <- vcovHC(iv_reg, type = "HC1")
 se_iv <- sqrt(diag(vcov_iv))
 
 notes2 <- "Robust standard error in parenthesis."
-stargazer(coeftest(iv_reg), ols_reg, type = "html", header = FALSE,
-          label = "tab:table2",
+stargazer(coeftest(iv_reg), ols_reg, type = "latex", header = FALSE,
+          label = "tab:q6table2",
           title = "IV estimate of Case-Shiller home price index.",
-          dep.var.caption = "",
-          dep.var.labels = "log(price index)",
-          covariate.labels = c("pro-plantiff", "missing", "numcasecat",
+          model.names = FALSE,
+          dep.var.caption = "log(price index)",
+          dep.var.labels = "",
+          dep.var.labels.include = FALSE,
+          column.labels = c("IV", "OLS"),
+          covariate.labels = c("pro-plaintiff", "missing", "numcasecat",
                                "Intercept"),
           report = "vcs",
           se = list(se_iv, NULL),
-          omit = c("prob_*"),
+          omit = c("prob*"),
           omit.stat = c("rsq", "ser"),
           omit.table.layout = NULL,
           notes = notes2,
           notes.append = FALSE)
 ```
 
+
+Let's check the instrument relevance. We'll regress the pro-plaintiff variable `numpro_casecat_12` on the instrument `numpanels1x_dem` and all control variables and check the t statistic of this coefficient.
+
+```{r q6fisrt-stage, results="asis"}
+first_stage <- lm(paste0("numpro_casecat_12 ~ numpanels1x_dem+", controls),
+                  data = cs_probs)
+
+stargazer(coeftest(first_stage), type = "latex", header = FALSE,
+          label = "tab:q6table3",
+          title = "First stage estimate.",
+          model.names = FALSE,
+          dep.var.labels = "pro-plaintiff",
+          report = "vc*stp",
+          omit = c("prob*", "missing*", "numcase*"),
+          omit.stat = c("rsq", "ser")
+          )
+
+```
+
+Since the estimated coefficient related to the instrument is not significant, we can infer this instrument is weak and should not be used.
+
+Again, the results from regression in Table \@ref(tab:q6table2) are not significant for pro-plaintiff variable although this time, using controls and IV, the point estimate is negative. If the results were in fact significant, we could have done causal inference according to the authors. That is because, **after** controlling for circuit characteristics, judges are randomly assigned to cases and thus, selection bias is (should be) eliminated.
+
 **(e) Do you think the coefficient found in (d) is a credible estimate of the causal effect we set ourselves to analyse? Why? If the answer is negative, could you use the data available and run an alternative specification that would produce more credible estimates? What did you find?**
+
+No it's not. We have showed this is a weak instrument and as such, our estimated coefficient for pro-plaintiff variable is not reliable. When a weak instrument is utilized, it is very well possible that the IV bias is even **larger** than OLS bias.
+
+We can try to find another instrument. STILL NEED TO GET A BETTER UNDERSTANDING OF THIS DATA.
+
+## References {-}

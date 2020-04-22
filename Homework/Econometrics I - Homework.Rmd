@@ -6,17 +6,25 @@ author:
   - "Professor: Bruno Ferman"
 date: "`r Sys.Date()`"
 output: 
-  bookdown::html_book:
+  bookdown::pdf_book:
     highlight: espresso
     toc: false
     number_sections: false
+    keep_tex: true
+fontsize: 12pt
+linestretch: 1.5
 bibliography: "econometrics.bib"
 biblio-style: "apalike"
 link-citations: true
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
+options(scipen = 9999)
+library(ipumsr)
+
+ddi <- read_ipums_ddi("Dados/ipumsi_00001.xml")
+data <- read_ipums_micro(ddi)
 ```
 
 # Questions
@@ -33,62 +41,67 @@ This type of **endogeneity** is called by @Hansen2020 as simultaneous equation b
 
 In order to have non-biased estimate of childbearing effect on labor-supply one of the strategies that the researcher can make use of is **Instrumental Variables - IV**. But even if the instrument is valid, this still does not ensure us the estimated coefficient has a causal interpretation, this comes only when the instruments considered, _same sex_ and _twins-2_ are in fact randomly assigned to each mother, since no one can choose the sex of the baby or whether to have a single or multiple births. Only when the instruments chosen are randomly assigned that the authors are able to claim their regression is assessing causal effects of childbearing on family labor-supply.
 
-Although the paper explicitly says "jointly determined", one can approach the problem as a regression with omitted explanatory variable and as such, it presents a *omitted variable bias* if OLS is to be employed. We can think of "desire to have a couple" as the omitted variable that has some explanatory power over labor supply. Let's denote this unobservable variable as $c$ and we have that the bias from not taking it at account in our regression model is:
+In order to analyse the direction of a possible bias one can use the fact that, in a simultaneous equations framework, an OLS estimator is shown to be a weighted average of each equation's estimator, where the weights are related to errors variance. Suppose $X$ is fertility and $Y$ is some measure of labor-supply, our simultaneous equations model would be:
+
+$$\begin{cases}
+X_i=\alpha_0+\alpha_1Y_i+u_i\\
+Y_i=\beta_0+\beta_1X_i+v_i
+\end{cases}$$
+
+we are interested in $\beta_1$. The OLS estimator, $\hat{\beta}_1$ is shown to converge in probability to:
+$$\hat{\beta}_1\overset{p}{\rightarrow}\left(\frac{\sigma^2_v}{\sigma^2_u+\beta_1^2\sigma^2_v}\right)\alpha_1+\left(\frac{\sigma^2_u}{\sigma^2_u+\beta_1^2\sigma^2_v}\right)\beta_1$$
+
+From the literature of determinants of women fertility, see @Heckman1990 as cited by the authors, we expect the correlaion of labor-supply and fertility to be negative, that is, $\alpha_1<0$. 
+
+At this point we need make some assumptions about the magnitudes of $\alpha_1$ and $\beta_1$, since we expect both to be negative. Our assumption is that the labor-supply impact magnitude on fertility is greater than the other way round, so the magnitude of $\alpha_1$ is larger than that of $\beta_1$. Hence, our OLS estimator would be biased towards lower values of $\beta_1$. This is to say that we expect the impact of childbearing on labor-supply, **when estimated through OLS**, to have an exceedingly negative value.    
+
+Although the paper explicitly says "jointly determined", one can approach the problem as a regression with omitted explanatory variable and as such, it presents *omitted variable bias* if OLS is to be employed. We can think of "desire to have a couple" as the omitted variable that has some explanatory power over labor supply. Let's denote this unobservable variable as $c$ and we have that the bias from not taking it at account in our regression model is:
 
 $$\hat{\beta_{ols}}-\beta=\delta \frac{cov(x, c)}{var(x)}$$
 
 where $\beta$ is the true parameter relating labor-supply to fertility, $x$, and $\delta$ is the parameter relating the desire of having a couple as children to labor-supply.
 
-It's natural to suppose that $\delta<0$, since parents, and especially mothers with a great desire to have children of opposing gender are more concerned about their family, home environment and childbearing than of making a professional career. Meanwhile, the covariance of $x$ and $c$ is positive, that is, couples trying to have kids of different sex tend to have more children. They need to play the odds, plain and simple.
+It's natural to suppose that $\delta<0$, since parents, and especially mothers with a great desire to have children of opposite gender are more concerned about their family, home environment and childbearing than making a professional career. Meanwhile, the covariance of $x$ and $c$ is positive, that is, couples trying to have kids of different sex tend to have more children. They need to play the odds, plain and simple.
 
 Therefore, one can suppose that OLS bias in this setup is negative and it actually **exacerbates the negative** relation of fertility to labor-supply.
 
 **2. Put yourself in the shoes of the authors of the paper. How would you justify the validity of each of these two instrumental variables?**
 
-In order to justify the validity of any instrumental variable the researcher needs to attest two conditions: relevance of the instrument and the exclusion condition.
+In order to justify the validity of any instrumental variable the researcher needs to attest two conditions: relevance of the instrument and the exclusion restriction.
 
 Relevance of the instrument says that our potentially endogenous regressor variable, $x$, has to be correlated to our instrument of choice, $z$. That is, the expected value of the product of these variables should not be equal to zero, $\mathbb{E}[z_i x_i]\neq 0$, for all individuals, $i$, in our population. Since the regressor chosen is a dummy variable that indicates that the mother has more than two children, the instruments _same_sex_ and _twins-2_ are correlated to the regressor. The authors, following an extensive literature on the matter, argument that parents who have the first two kids of the same sex are more prone to have a third one, while the parents of twins at the second pregnancy get the third kid as a surprise.
 
-The exclusion condition is held when the instrument affects the dependent variable, $y$, _only_ through its effect on the regressor, that is, there is no other channel of transmission, direct or indirect, in which the instrument influences the dependent variable. This means that the expected value of the product of the instrument and the structural equation error term is equal to zero, $\mathbb{E}[z_ie_i]=0$ when the structural equation is given by: $y_i=\mathbf{x_i'\beta}+e_i$. For the _same_sex_ instrument it is easy to see that, since having the first two kids is random, it should not have any direct influence on the labor-supply provision, both for mother and father. As for the _twins-2_ goes, things are not that clear it is not dependent on other mother's demographic characteristics, but anyway, having twins is largely a random variable and no one expects it to have any impact on the choice of labor-supply.
+The exclusion restriction is held when the instrument affects the dependent variable, $y$, _only_ through its effect on the regressor, that is, there is no other channel of transmission, direct or indirect, in which the instrument influences the dependent variable. This means that the expected value of the product of the instrument and the structural equation error term is equal to zero, $\mathbb{E}[z_ie_i]=0$ when the structural equation is given by: $y_i=\mathbf{x_i'\beta}+e_i$. For the _same_sex_ instrument it is easy to see that, since having the first two kids of the same sex is random, it should not have any direct influence on the labor-supply provision, both for mother and father. As for the _twins-2_ goes, things are not that clear it is not dependent on other mother's demographic characteristics, but anyway, having twins is largely a random variable and no one expects it to have any impact on the choice of labor-supply other than through the number of children. Eventhough, the authors have controlled for several other variables that may impact this instrument.
 
 **3. Now put yourself in the shoes of a referee evaluating the paper. Discuss different potential threats to the validity of these instruments.**
 
-First start with _twins-2_ instrument. There is some literature that relates having twins to maternal characteristics like age, height, weight, race and the use of fertility treatments, @Farbmacher2018 cites a few of them. Also, having dizygotic twins is largely influenced by genetic traits, @Painter2010, and so the conditional expectation of having twins for a woman who is first degree related to a dizygotic twin, or is a twin herself, is not the same as the general population. Women that undergo a fertility treatment are making an endogenous decision that we know raises the probability of having twins, and these treatments are evermore common nowadays. 
+First start with _twins-2_ instrument. There is some literature that relates having twins to maternal characteristics like age, height, weight, race and the use of fertility treatments, @Farbmacher2018 cites a few of them. Also, having dizygotic twins is largely influenced by genetic traits, @Painter2010, and so the conditional expectation of having twins for a woman who is first degree related to a dizygotic twin, or is a twin herself, is not the same as the general population. Women that undergo a fertility treatment are making a possible endogenous decision that we know raises the probability of having twins, and these treatments are evermore common nowadays. This decision may be endogenous since fertility treatment are not inexpensive and may be used by the very women who postponed their childbearing in favor of professional carrer, thus having an impact on labor-supply. These women will appear as having higher income and possibly working more hours per week, at the same time as having more children (twins inclusive).
 
-The _twins-2_ indicator is constructed by the authors, it is not a mother's declaration that their kids are in fact twins. This poses some issues with the instrument created for example, the case where the husband is the father of one the children and the kids happen to be about the same age (i.e. the same quarter). In this case the children would be deemed as twins, an assumption far from reality. Moreover, the fact that a single mother happens to find a suitable husband, father of a kid of the same ages as hers, might influence on the decision to get married and the marriage can have an impact on labor-supply decision. 
+The _twins-2_ indicator is constructed by the authors, it is not a mother's declaration that their kids are in fact twins. This poses some issues with the instrument created for example, the case where the husband is the father of one of the children and the kids happen to be about the same age (i.e. the same quarter). In this case the children would be deemed as twins, an assumption far from reality. Moreover, the fact that a single mother happens to find a suitable husband, father of a kid of the same ages as hers, might influence on the decision to get married and the marriage can have an impact on labor-supply decision. Also, it is known that twins have inferior endowments at birth, such as lower APGAR scores and lower health in general, than singletons. These differences might induce parents to stay home longer to take care of their children and this will violate the exclusion restriction.
 
 All these facts contribute to invalidate the _twins-2_ as an instrument to fertility and its randomness, spoiling the causal inference that otherwise could be done.
 
-TODO: ARGUMENT AGAINST SAME SEX.  
+As for the _same_sex_ instrument, our criticism falls on studies that show female children have poorer immunological response from birth up to early childhood, @Klein2016, and thus mothers of two girls are more prone to stay at home or have medical appointments more often then families of two boys. Therefore the instrument might have a direct relation to labor-supply invalidating the exclusion restriction. In this scenario the instrument would be invalid.
 
-Male children have poorer health at birth and thus mothers with two boys are more prone to stay at home or have medical appointments more often then families of two girls. Therefore the instrument might have a direct impact on labor-supply and thus, invalidating the exclusion hypothesis, this instrument would be invalid.
+At the same time, there are some literature relating economies of scale in parenting children of the same sex like [@Rosenzweig2000] and in contrast, no evidence of such economies, like the unpublished manuscript [@Butikofer2011]. If there are indeed such economies of scale then the _same_sex_ instrument is not exogenous and thus the exclusion restriction is violated, deeming it as an invalid instrument. @Rosenzweig2000 argue that having mixed sex siblings violate the exclusion restriction by directly affecting both the marginal utility of leisure, parents spend more time taking care of their children and child rearing costs, specially clothing and, thus labor supply.
 
 **4. Discuss how the importance of the threats you discussed in the previous item might vary if you consider the same instruments for different countries or different years.**
 
-The threat of _twins-2_ be an invalid instrument seems to be more relevant as the time passes, since modern families structure are going towards households with children from different parents marriages living under the same roof ever more common. Fertility treatments are now common place and many women postpone childbearing in favor of developing their professional careers. When they decide to have a child, the age factor might influence in the necessity of fertility treatment and thus raising the probability of having twins. Especially on the Western cultures, this seems to be affecting almost all countries. For other religion/culture countries we lack information about this topic and cannot make any assertion.
+The threat of _twins-2_ be an invalid instrument seems to be more relevant as the time passes, since modern families structure are going towards households with children from different parents marriages living under the same roof ever more common. Fertility treatments are now common place and many women postpone childbearing in favor of developing their professional careers. When they decide to have a child, the age factor might influence in the necessity of fertility treatment and thus raising the probability of having twins. Especially on the Western cultures, this seems to be affecting almost all countries. For other religion/culture countries we lack information about this topic and cannot make any assertion. 
 
-Public policies that provide incentives to give birth or otherwise, like China.
+Also, dizygotic twins are highly correlated to personal characteristics such as weight, height, race, genetics, etc. Since personal traits are different among countries, it is reasonable to suppose that the probability of having twins at the second pregnancy are not the same (and not random after all) among different nations. The same characteristics that tilt the odds in or out of favor to bear twins, may be relevant to the determination of labor-supply related variables, which would invalidate the instrument. Thus, even if _twins-2_ is a good instrument in the USA, it may not be true in any other place.
 
-TODO: ARGUMENT ABOUT SAME SEX.
+Public policies that provide incentives to control fertility rates, like the one-child and nowadays two-child policy in China may affect the _same_sex_ instrument. The main assumption of this instrument is that parents of same sex kids have a higher probability of having a third one, expecting this time a child of opposite sex will be conceived. If a public policy, through an incentive mechanism like subsidies or by law enforcement, suppress this relation then the instrument loses relevance and may not work as intended. 
+
+The relevance of the _same_sex_ instrument may decrease through time if parents are changing their preferences towards children of opposite sex. There also may be a great heterogeneity among countries on those preferences, @Hank2000 found it across 17 Western European countries and although on average parents had a tendency to prefer a mixed sex composition, it was not uncommon that there was countries in which parents had no preference at all. 
+
+And there are countries in which typically boys are preferred, for example China and other asian countries, [@Hesketh2011]. At these countries the practice of sex-selective abortion may tilt the odds of having two kids of the same sex, thus rendering the instrument as not random and opening the possibility it is related to aspects of labor-supply. 
 
 **5. Select a country and a census year from [IPUMS](https://international.ipums.org/international/index.shtml). Estimate the effects of family size on parents’ labor supply using this sample. Each student should choose a different sample. Once you select your sample, sign up in the google doc to guarantee no one else is using the same sample [(link)](https://docs.google.com/spreadsheets/d/1tI9acQk0LdPMhXMwQoVlOex1fnxsqmf8-anfytZoZgc/edit?usp=sharing). Submit a well-polished table with the results. Analyse how your results differ from @Angrist1998 . Submit your codes in an appendix.**
 
-This regression model is 
+Due to delay in getting needed data to execute this exercise, there was not enough time to perform a complete article's replication. Indeed, the data from the chosen country, Switzerland in year 2000, was not quite the same as the authors had for USA. For example, the only measure of labor supply we could extract from IPUMS was `hours per week` of work.
 
-
-\begin{equation}
-y_i=\alpha_0'w_i+\alpha_1 s_{1i}+\alpha_2 s_{2i}+\beta x_i+\varepsilon_i
-(\#eq:structural)
-\end{equation}
-
-\begin{equation}
-x_i=\pi_0'w_i + \pi_1 s_{1i} + \pi_2 s_{2i} + \gamma same\_sex_i+\eta_i
-(\#eq:first-stage)
-\end{equation}
-
-where $w_i$ are the demographic control variables, mother's age and age at first birth, plus race and Hispanic indicators. The control variables for sex are $s_{1i}$ and $s_{2i}$ for first and second child respectively, which equal one if the child's gender is male.
-
-Present Tables 6 and 7 of the paper.
+Even in the presence of those constraints, I tried to deliver some empirical study on the matter of fertility versus labor-supply for swiss women. First we will present some descriptive statistics, then the OLS regression without any kind of control or instrumental variables, the Wald estimation and finally regressions with instrumental variables _same-sex_ and _twins-2_.  
 
 ```{r libraries, message=FALSE}
 library(AER)
@@ -96,64 +109,444 @@ library(lmtest)
 library(sandwich)
 library(tidyverse)
 library(broom)
+library(kableExtra)
 library(stargazer)
+library(texreg)
 ```
 
-```{r random-gen, cache=TRUE}
-n_sample <- 1000
-set.seed(123)
-s1 <- sample(c(0,1), size = n_sample, replace = TRUE)
-s2 <- sample(c(0,1), size = n_sample, replace = TRUE)
-two_boys <- s1*s2
-two_girls <- (1 - s1)*(1 - s2)
-same_sex <- two_boys + two_girls
-# Tilt the probability of having more than two children if same sex
-probs <- ifelse(same_sex, 0.6, 0.4)
-more_two_child <- as.numeric(rbernoulli(n_sample, p = probs))
-# Test routine
-# mean(more_two_child[which(same_sex == 1)])
-# mean(more_two_child[which(same_sex == 0)])
-# Now define labor_income to be negatively dependent on more_two_child
-set.seed(123)
-labor_income <- pmax(10000 - 1850*more_two_child + rnorm(n_sample, sd = 1000), 0)
-df <- data.frame(labor_income = labor_income,
-                 s1 = s1,
-                 s2 = s2,
-                 more_two_child = more_two_child,
-                 same_sex = same_sex,
-                 two_boys = two_boys,
-                 two_girls = two_girls)
+```{r clean, cache=TRUE}
+# df is a small sample of the base
+# workout on this sample first to debug algorithms
+serials <- sample(unique(data$SERIAL), 10000) 
+df <- data %>% 
+  filter(SERIAL %in% serials) %>%
+  filter(NFAMS == 1) %>% 
+  select(SERIAL, PERSONS, NFAMS, MOMLOC, RELATE, AGE, SEX, HRSWORK1, PERNUM, 
+         HEADLOC, CHBORN, NCOUPLES)
+
+dfnum_child <- df %>% 
+  mutate(child = MOMLOC != 0 & RELATE != 1) %>% 
+  group_by(SERIAL) %>%
+  summarise(num_child = sum(child), fertility = if_else(num_child > 2, 1, 0)) 
+
+df_child <- df %>% 
+  left_join(dfnum_child, by = "SERIAL")
+rm(df)
+
+# Control variables for sex of 1st an 2nd child
+sex1 <- df_child %>% 
+  select(SERIAL, AGE, SEX, MOMLOC) %>% 
+  filter(MOMLOC != 0) %>% 
+  group_by(SERIAL) %>% 
+  top_n(1, AGE) %>% 
+  mutate(sex1 = if_else(SEX == 1, 1, 0)) %>% 
+  select(SERIAL, sex1)
+
+sex2 <- df_child %>% 
+  select(SERIAL, AGE, SEX, MOMLOC) %>% 
+  filter(MOMLOC != 0) %>% 
+  group_by(SERIAL) %>% 
+  arrange(desc(AGE), .by_group = TRUE) %>%
+  slice(2) %>% 
+  mutate(sex2 = if_else(SEX == 1, 1, 0)) %>% 
+  select(SERIAL, sex2)
+
+# Instruments
+same_sex <- df_child %>% 
+  filter((MOMLOC != 0)) %>% 
+  group_by(SERIAL) %>% 
+  top_n(2, AGE) %>% 
+  mutate(same_sex = if_else(SEX == lag(SEX), 1, 0)) %>% 
+  na.omit() %>% 
+  select(SERIAL, same_sex)
+
+twins_2 <- df_child %>% 
+  select(c(SERIAL, num_child, AGE, SEX, MOMLOC)) %>% 
+  filter((MOMLOC != 0) & (num_child > 2)) %>% 
+  group_by(SERIAL) %>% 
+  arrange(desc(AGE), .by_group = TRUE) %>% 
+  slice(2:3) %>% 
+  mutate(twins_2 = if_else((AGE == lag(AGE)) & (MOMLOC == lag(MOMLOC)), 1,0)) %>% 
+  na.omit() %>% 
+  select(SERIAL, twins_2)
+
+df_clean <- df_child %>% 
+  left_join(same_sex, by = "SERIAL") %>% 
+  left_join(twins_2, by = "SERIAL") %>% 
+  left_join(sex1, by = "SERIAL") %>% 
+  left_join(sex2, by = "SERIAL") %>% 
+  mutate(two_boys = sex1 & same_sex,
+         two_girls = !sex1 & same_sex) 
 ```
 
-```{r first-stage}
-first_reg <- lm(more_two_child ~ same_sex, data = df)
-first_robse <- sqrt(diag(vcovHC(first_reg, type = "HC1")))
+```{r suma_tables, cache=TRUE}
+# Get the oldest woman in house
+# If CHBORN unknown then it is zero
+all_women <- df_clean %>% 
+  filter(SEX == 2) %>% 
+  group_by(SERIAL) %>% 
+  top_n(1, AGE) %>% 
+  mutate(age_group = case_when(AGE < 21 ~ "MINOR21",
+                               AGE < 36 ~ "AGE2135",
+                               AGE < 51 ~ "AGE3650",
+                               TRUE ~ "OLDER50"),
+         CHBORN = if_else(CHBORN > 30, 0, as.numeric(CHBORN)),
+         two_plus = if_else(num_child > 1, 1, 0))
+
+# Number of women working 140h+ per week!!
+# sum(all_women$HRSWORK1 == 140)/nrow(all_women) # 3736 women. About 46.7%
+
+suma_age <- all_women %>% 
+  filter(age_group != "MINOR21", HRSWORK1 < 141) %>% 
+  group_by(age_group) %>% 
+  summarise(mean_child = mean(CHBORN), pct_two_plus = sum(two_plus)/n(),
+            mean_hours = mean(HRSWORK1), observations = n())
+
+suma_two_plus <- all_women %>% 
+  filter(age_group %in% c("AGE2135", "AGE3650"), two_plus == 1, HRSWORK1 < 141) %>% 
+  group_by(age_group) %>% 
+  summarise(mean_child = mean(CHBORN), pct_more_two = sum(fertility)/n(),
+            mean_hours = mean(HRSWORK1), observations = n())
+
+suma_married_two_plus <- all_women %>% 
+  filter(age_group %in% c("AGE2135", "AGE3650"), two_plus == 1, NCOUPLES == 1, HRSWORK1 < 141) %>% 
+  group_by(age_group) %>% 
+  summarise(mean_child = mean(CHBORN), pct_more_two = sum(fertility)/n(),
+            mean_hours = mean(HRSWORK1), observations = n())
+
+# Refer to table 2 in Angrist1998
+# Descriptive statistics for women with two or more children at home
+# and less than 50 years old
+suma_detailed <- all_women %>% 
+  filter(age_group %in% c("AGE2135", "AGE3650"), two_plus == 1, HRSWORK1 < 141) %>% 
+  group_by(age_group) %>% 
+  summarise(mean_child = mean(CHBORN), pct_more_two = sum(fertility)/n(),
+            boy_1st = sum(sex1)/n(), boy_2nd = sum(sex2)/n(), 
+            boys_2 = sum(two_boys)/n(), girls_2 = sum(two_girls)/n(),
+            same = sum(same_sex)/n(), 
+            twins = sum(twins_2, na.rm = TRUE)/n(),
+            mean_age = mean(AGE),
+            mean_hours = mean(HRSWORK1),
+            observations = n()) %>% 
+  pivot_longer(-age_group) %>% 
+  pivot_wider(names_from = age_group, values_from = value)
+
+suma_det_married <- all_women %>% 
+  filter(age_group %in% c("AGE2135", "AGE3650"), two_plus == 1, NCOUPLES == 1, 
+         HRSWORK1 < 141) %>% 
+  group_by(age_group) %>% 
+  summarise(mean_child = mean(CHBORN), pct_more_two = sum(fertility)/n(),
+            boy_1st = sum(sex1)/n(), boy_2nd = sum(sex2)/n(), 
+            boys_2 = sum(two_boys)/n(), girls_2 = sum(two_girls)/n(),
+            same = sum(same_sex)/n(), 
+            twins = sum(twins_2, na.rm = TRUE)/n(),
+            mean_age = mean(AGE),
+            mean_hours = mean(HRSWORK1),
+            observations = n()) %>% 
+  pivot_longer(-age_group) %>% 
+  pivot_wider(names_from = age_group, values_from = value)
 ```
 
-```{r iv-reg}
-ols_reg <- lm(labor_income ~ s1 + s2 + more_two_child, data = df)
-iv_reg <- ivreg(labor_income ~ s1 + s2 + more_two_child | s1 + s2+ same_sex, data = df)
+```{r regressions, cache=TRUE}
+women2135 <- all_women %>% 
+  filter(age_group == "AGE2135", two_plus == 1, HRSWORK1 < 141)
 
-ols_coef <- coeftest(ols_reg, vcov. = vcovHC, type = "HC1")
-iv_coef <- coeftest(iv_reg, vcov. = vcovHC, type = "HC1")
+ols_reg <- lm(HRSWORK1 ~ fertility, data = women2135)
+ols_robse <- sqrt(diag(vcovHC(ols_reg, type = "HC1")))
+wald_reg <- ivreg(HRSWORK1 ~ fertility | same_sex, data = women2135)
+wald_robse <- sqrt(diag(vcovHC(wald_reg, type = "HC1")))
+iv_reg <- ivreg(HRSWORK1 ~ sex1 + sex2 + fertility | sex1 + sex2 + same_sex, 
+                data = women2135)
+iv_robse <- sqrt(diag(vcovHC(iv_reg, type = "HC1")))
 ```
 
-```{r table6, results='asis'}
-notes6 <- "Robust standard error in parenthesis."
-stargazer(first_reg, type = "html", header = FALSE,
-          label = "tab:table6",
-          title = "First stage estimates of more than 2 children equation.",
-          dep.var.caption = "",
-          dep.var.labels = "labor income",
-          covariate.labels = c("same sex", "constant"),
-          report = "vcs",
-          se = list(first_robse),
-          omit.stat = c("rsq", "adj.rsq", "ser"),
-          omit.table.layout = NULL,
-          notes = notes6,
-          notes.append = FALSE)
+Below we find four tables with descriptive statistics for mean children ever born, percent of all women with two or more children **at home** (percent of more than two children for tables \@ref(tab:table2) and \@ref(tab:table3)), average of worked hours per week and the number of observations for each age group, 21-35 years old and 36-50 years old women.
+
+```{r table1, results='asis', echo=FALSE}
+suma_age %>% 
+  kable(booktabs = TRUE,
+        digits = 4,
+        col.names = c("Age Group", "Mean Children", "Percent 2+", 
+                      "Mean Hours", "Observations"),
+        caption = "Fertility and Labor-Supply Measures. All Women.") %>% 
+  kable_styling(latex_options = c("HOLD_position"),
+                full_width = FALSE,
+                position = "center")
+```
+
+```{r table2, results='asis', echo=FALSE}
+suma_two_plus %>% 
+  kable(booktabs = TRUE,
+        digits = 4,
+        col.names = c("Age Group", "Mean Children", "Percent more 2", 
+                      "Mean Hours", "Observations"),
+        caption = "Fertility and Labor-Supply Measures. Women with 2 or more children.") %>% 
+  kable_styling(latex_options = c("HOLD_position"),
+                full_width = FALSE,
+                position = "center")
+```
+
+```{r table3, results='asis', echo=FALSE}
+suma_married_two_plus %>% 
+  kable(booktabs = TRUE,
+        digits = 4,
+        col.names = c("Age Group", "Mean Children", "Percent more 2", 
+                      "Mean Hours", "Observations"),
+        caption = "Fertility and Labor-Supply Measures. Married women with 2 or more children.") %>% 
+  kable_styling(latex_options = c("HOLD_position"),
+                full_width = FALSE,
+                position = "center")
+```
+
+```{r table4, results='asis', echo=FALSE}
+names_row = c("Children ever born", "More than 2 children", 
+              "Boy 1st", "Boy 2nd", "Two boys", "Two girls", "Same sex",
+              "Twins-2", "Age", "Hours per week", "Observations")
+suma_det <- cbind(names_row, suma_detailed[, 2:3], suma_det_married[, 2:3])
+suma_det %>% 
+  kable(booktabs = TRUE,
+        digits = 4,
+        col.names = c("Variables", "Ages 21-35", "Ages 36-50", 
+                      "Ages 21-35", "Ages 36-50"),
+        caption = "Descriptive statistics, women with 2 or more children.") %>% 
+  kable_styling(latex_options = c("HOLD_position"),
+                full_width = FALSE,
+                position = "center") %>% 
+  add_header_above(c(" " = 1, "All Women" = 2, "Married Couples" = 2))
+```
+
+From the above tables one can sense that there is something odd with our variable of interest, _hours of work per week_, since it is quite unusual for any person to work anything in the range of 70 to 110 hours per week, imagine that on average for an entire nation! As we will see in a few moments, data collect from IPUMS, in harmonized form for Switzerland's 2000 census, is clearly wrong and not useful.
+
+For the simple OLS regression consider the following model:
+
+\begin{equation}
+y_i=\alpha+\beta x_i+\varepsilon_i
+(\#eq:ols)
+\end{equation}
+
+where $y_i$ is a hours of work per week, our measure of labor-supply and $x_i$ is the endogenous fertility measure, an indicator of having more than two children. For this model and now on for all other regressions, we concentrate on the 21-35 age group, as did the original authors.
+
+Now let $z_i$ be a binary instrument, then the Wald estimator is given by a ratio of mean differences:
+
+\begin{equation}
+\beta_{IV}=(\bar{y}_1-\bar{y}_0)/(\bar{x}_1-\bar{x}_0)
+(\#eq:wald)
+\end{equation}
+
+where $\bar{y}_1$ is the mean of $y_i$ for the observations when $z_i=1$. 
+
+And finally, for the complete IV specification we have that:
+
+\begin{equation}
+x_i=\pi_1 s_{1i} + \pi_2 s_{2i} + \gamma same\_sex_i+\eta_i
+(\#eq:first-stage)
+\end{equation}
+
+\begin{equation}
+y_i=\alpha_1 s_{1i}+\alpha_2 s_{2i}+\beta x_i+\varepsilon_i
+(\#eq:structural)
+\end{equation}
+
+where the control variables for sex are $s_{1i}$ and $s_{2i}$ for first and second child respectively, which equal one if the child's gender is male. Equation \@ref(eq:first-stage) is called the first stage in a two-stage least squares framework, while equation \@ref(eq:structural) is the structural model where we have an interest on $\beta$.
+
+Below we present table \@ref(tab:table5) comparing results among these three models on one subsample of interest. All women between ages 21-35 with two or more children. As one can notice, the results achived are way off our reasonable prior belief for the impact of childbearing to women labor-supply. The results stem from the fact that our variable of interest, _hours of work per week_, were collect from IPUMS website as **harmonized** variable. This means the raw data from Swiss administration has been transformed and aggregated in order to produce a value comparable to other countries. The problem with this approach is that it may result in inaccurate values after data processing, as it seems to be the current case. 
+
+If we take a look at the values for all women, mothers or not, working for payment, one can see we have `r nrow(all_women)` observations and `r sum(all_women$HRSWORK1 == 140)` of these "have declared" to work 140 hours per week or more! This is about `r format(sum(all_women$HRSWORK1 == 140)/nrow(all_women) * 100, digits = 0)`% of our entire universe of working women. Our best guess about what is going on here is that when harmonizing the variable, IPUMS has summed up hours of work in all jobs, which is the right procedure, with "Number of weekly hours: housework and caring for the family" which is one of the question the respondent answer in source questionnaire. 
+
+Unfortunatelly our time is short and I could not work out a solution to this problem. I believe the procedure so far is correct, from downloading data, manipulate it, create the instruments and deriving descriptive statistics, and all the R source code is provided in an appendix.
+
+
+```{r table5, results = "asis"}
+notes <- "Values highly biased due to a large number of misinformed hours of work per week into the database."
+texreg(list(ols_reg, wald_reg, iv_reg), booktabs = TRUE, use.packages = FALSE,
+       caption = "Estimates of more than 2 children equations.",
+       caption.above = TRUE,
+       label = "tab:table5",
+       custom.model.names = c("OLS", "Wald", "IV"),
+       reorder.coef = c(2, 3, 4, 1),
+       custom.note = notes)
+```
+
+```{r plot-hist, message=FALSE, fig.cap="Concentration of women working more than 140 hours per week"}
+all_women %>% 
+  filter(HRSWORK1 < 141) %>% 
+  mutate(HRSWORK1 = as.numeric(HRSWORK1)) %>% 
+  ggplot(aes(x = HRSWORK1)) +
+  geom_histogram() +
+  scale_color_viridis_d() +
+  scale_x_continuous(breaks = seq(0, 140, 10)) +
+  labs(title = "Distribution of weekly hours of work - Switzerland 2000",
+       x = "hours",
+       y = "count",
+       caption = "Source: IPUMS.") +
+  theme_classic()
 ```
 
 **6. Using the data from the previous item, how could you provide evidence in favor and/or against the validity of the instruments?**
 
+As requested by email, even in the case we did not do the empirical part of this homework, we have to explain how one would perform tests to validate the choice of instruments.
+
+First we have to notice the exclusion condition, the instrument's exogeneity to regression errors is not directly testable. So, we must rely on our good arguments provided in question 2, that the instruments are indeed exogenous and valid.
+
+As for instrument relevance, we could test the sample correlation between the instrument and the regressor variable, fertility. This correlation should be different from zero, and the higher the better, in any direction. Eventhough, we do expect the correlation in the present case to be positive. We constructed instruments that point in the same direction of our regressor. Couples with first two children of the same sex tend to have more kids and the same goes for parents of twins at second pregnancy.
+
+Other ways of testing instrument validity are robustness checks, just like the ones performed by the article's authors. 
+
+COMPLETE THIS PART ABOUT ROBUSTNESS CHECKS
+
+## Appendix
+
+```{r codes, eval = FALSE, echo = TRUE}
+library(ipumsr)
+library(AER)
+library(lmtest)
+library(sandwich)
+library(tidyverse)
+library(kableExtra)
+library(texreg)
+
+ddi <- read_ipums_ddi("Dados/ipumsi_00001.xml")
+data <- read_ipums_micro(ddi)
+
+# df is a small sample of the base
+# workout on this sample first to debug algorithms
+serials <- sample(unique(data$SERIAL), 10000) 
+df <- data %>% 
+  filter(SERIAL %in% serials) %>%
+  filter(NFAMS == 1) %>% 
+  select(SERIAL, PERSONS, NFAMS, MOMLOC, RELATE, AGE, SEX, HRSWORK1, PERNUM, 
+         HEADLOC, CHBORN, NCOUPLES)
+
+dfnum_child <- df %>% 
+  mutate(child = MOMLOC != 0 & RELATE != 1) %>% 
+  group_by(SERIAL) %>%
+  summarise(num_child = sum(child), fertility = if_else(num_child > 2, 1, 0)) 
+
+df_child <- df %>% 
+  left_join(dfnum_child, by = "SERIAL")
+rm(df)
+
+# Control variables for sex of 1st an 2nd child
+sex1 <- df_child %>% 
+  select(SERIAL, AGE, SEX, MOMLOC) %>% 
+  filter(MOMLOC != 0) %>% 
+  group_by(SERIAL) %>% 
+  top_n(1, AGE) %>% 
+  mutate(sex1 = if_else(SEX == 1, 1, 0)) %>% 
+  select(SERIAL, sex1)
+
+sex2 <- df_child %>% 
+  select(SERIAL, AGE, SEX, MOMLOC) %>% 
+  filter(MOMLOC != 0) %>% 
+  group_by(SERIAL) %>% 
+  arrange(desc(AGE), .by_group = TRUE) %>%
+  slice(2) %>% 
+  mutate(sex2 = if_else(SEX == 1, 1, 0)) %>% 
+  select(SERIAL, sex2)
+
+# Instruments
+same_sex <- df_child %>% 
+  filter((MOMLOC != 0)) %>% 
+  group_by(SERIAL) %>% 
+  top_n(2, AGE) %>% 
+  mutate(same_sex = if_else(SEX == lag(SEX), 1, 0)) %>% 
+  na.omit() %>% 
+  select(SERIAL, same_sex)
+
+twins_2 <- df_child %>% 
+  select(c(SERIAL, num_child, AGE, SEX, MOMLOC)) %>% 
+  filter((MOMLOC != 0) & (num_child > 2)) %>% 
+  group_by(SERIAL) %>% 
+  arrange(desc(AGE), .by_group = TRUE) %>% 
+  slice(2:3) %>% 
+  mutate(twins_2 = if_else((AGE == lag(AGE)) & (MOMLOC == lag(MOMLOC)), 1,0)) %>% 
+  na.omit() %>% 
+  select(SERIAL, twins_2)
+
+df_clean <- df_child %>% 
+  left_join(same_sex, by = "SERIAL") %>% 
+  left_join(twins_2, by = "SERIAL") %>% 
+  left_join(sex1, by = "SERIAL") %>% 
+  left_join(sex2, by = "SERIAL") %>% 
+  mutate(two_boys = sex1 & same_sex,
+         two_girls = !sex1 & same_sex) 
+
+# Get the oldest woman in house
+# If CHBORN unknown then it is zero
+all_women <- df_clean %>% 
+  filter(SEX == 2) %>% 
+  group_by(SERIAL) %>% 
+  top_n(1, AGE) %>% 
+  mutate(age_group = case_when(AGE < 21 ~ "MINOR21",
+                               AGE < 36 ~ "AGE2135",
+                               AGE < 51 ~ "AGE3650",
+                               TRUE ~ "OLDER50"),
+         CHBORN = if_else(CHBORN > 30, 0, as.numeric(CHBORN)),
+         two_plus = if_else(num_child > 1, 1, 0))
+
+# Number of women working 140h+ per week!!
+# sum(all_women$HRSWORK1 == 140)/nrow(all_women) # 3736 women. About 46.7%
+
+suma_age <- all_women %>% 
+  filter(age_group != "MINOR21", HRSWORK1 < 141) %>% 
+  group_by(age_group) %>% 
+  summarise(mean_child = mean(CHBORN), pct_two_plus = sum(two_plus)/n(),
+            mean_hours = mean(HRSWORK1), observations = n())
+
+suma_two_plus <- all_women %>% 
+  filter(age_group %in% c("AGE2135", "AGE3650"), two_plus == 1, HRSWORK1 < 141) %>% 
+  group_by(age_group) %>% 
+  summarise(mean_child = mean(CHBORN), pct_more_two = sum(fertility)/n(),
+            mean_hours = mean(HRSWORK1), observations = n())
+
+suma_married_two_plus <- all_women %>% 
+  filter(age_group %in% c("AGE2135", "AGE3650"), two_plus == 1, NCOUPLES == 1, 
+         HRSWORK1 < 141) %>% 
+  group_by(age_group) %>% 
+  summarise(mean_child = mean(CHBORN), pct_more_two = sum(fertility)/n(),
+            mean_hours = mean(HRSWORK1), observations = n())
+
+# Refer to table 2 in Angrist1998
+# Descriptive statistics for women with two or more children at home
+# and less than 50 years old
+suma_detailed <- all_women %>% 
+  filter(age_group %in% c("AGE2135", "AGE3650"), two_plus == 1, HRSWORK1 < 141) %>% 
+  group_by(age_group) %>% 
+  summarise(mean_child = mean(CHBORN), pct_more_two = sum(fertility)/n(),
+            boy_1st = sum(sex1)/n(), boy_2nd = sum(sex2)/n(), 
+            boys_2 = sum(two_boys)/n(), girls_2 = sum(two_girls)/n(),
+            same = sum(same_sex)/n(), 
+            twins = sum(twins_2, na.rm = TRUE)/n(),
+            mean_age = mean(AGE),
+            mean_hours = mean(HRSWORK1),
+            observations = n()) %>% 
+  pivot_longer(-age_group) %>% 
+  pivot_wider(names_from = age_group, values_from = value)
+
+suma_det_married <- all_women %>% 
+  filter(age_group %in% c("AGE2135", "AGE3650"), two_plus == 1, NCOUPLES == 1, 
+         HRSWORK1 < 141) %>% 
+  group_by(age_group) %>% 
+  summarise(mean_child = mean(CHBORN), pct_more_two = sum(fertility)/n(),
+            boy_1st = sum(sex1)/n(), boy_2nd = sum(sex2)/n(), 
+            boys_2 = sum(two_boys)/n(), girls_2 = sum(two_girls)/n(),
+            same = sum(same_sex)/n(), 
+            twins = sum(twins_2, na.rm = TRUE)/n(),
+            mean_age = mean(AGE),
+            mean_hours = mean(HRSWORK1),
+            observations = n()) %>% 
+  pivot_longer(-age_group) %>% 
+  pivot_wider(names_from = age_group, values_from = value)
+
+women2135 <- all_women %>% 
+  filter(age_group == "AGE2135", two_plus == 1, HRSWORK1 < 141)
+
+ols_reg <- lm(HRSWORK1 ~ fertility, data = women2135)
+ols_robse <- sqrt(diag(vcovHC(ols_reg, type = "HC1")))
+wald_reg <- ivreg(HRSWORK1 ~ fertility | same_sex, data = women2135)
+wald_robse <- sqrt(diag(vcovHC(wald_reg, type = "HC1")))
+iv_reg <- ivreg(HRSWORK1 ~ sex1 + sex2 + fertility | sex1 + sex2 + same_sex, 
+                data = women2135)
+iv_robse <- sqrt(diag(vcovHC(iv_reg, type = "HC1")))
+```
 ## References {-}
