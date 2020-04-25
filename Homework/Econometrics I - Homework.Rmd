@@ -51,7 +51,7 @@ Y_i=\beta_0+\beta_1X_i+v_i
 we are interested in $\beta_1$. The OLS estimator, $\hat{\beta}_1$ is shown to converge in probability to:
 $$\hat{\beta}_1\overset{p}{\rightarrow}\left(\frac{\sigma^2_v}{\sigma^2_u+\beta_1^2\sigma^2_v}\right)\alpha_1+\left(\frac{\sigma^2_u}{\sigma^2_u+\beta_1^2\sigma^2_v}\right)\beta_1$$
 
-From the literature of determinants of women fertility, see @Heckman1990 as cited by the authors, we expect the correlaion of labor-supply and fertility to be negative, that is, $\alpha_1<0$. 
+From the literature of determinants of women fertility, see @Heckman1990 as cited by the authors, we expect the correlation of labor-supply and fertility to be negative, that is, $\alpha_1<0$. 
 
 At this point we need make some assumptions about the magnitudes of $\alpha_1$ and $\beta_1$, since we expect both to be negative. Our assumption is that the labor-supply impact magnitude on fertility is greater than the other way round, so the magnitude of $\alpha_1$ is larger than that of $\beta_1$. Hence, our OLS estimator would be biased towards lower values of $\beta_1$. This is to say that we expect the impact of childbearing on labor-supply, **when estimated through OLS**, to have an exceedingly negative value.    
 
@@ -71,11 +71,11 @@ In order to justify the validity of any instrumental variable the researcher nee
 
 Relevance of the instrument says that our potentially endogenous regressor variable, $x$, has to be correlated to our instrument of choice, $z$. That is, the expected value of the product of these variables should not be equal to zero, $\mathbb{E}[z_i x_i]\neq 0$, for all individuals, $i$, in our population. Since the regressor chosen is a dummy variable that indicates that the mother has more than two children, the instruments _same_sex_ and _twins-2_ are correlated to the regressor. The authors, following an extensive literature on the matter, argument that parents who have the first two kids of the same sex are more prone to have a third one, while the parents of twins at the second pregnancy get the third kid as a surprise.
 
-The exclusion restriction is held when the instrument affects the dependent variable, $y$, _only_ through its effect on the regressor, that is, there is no other channel of transmission, direct or indirect, in which the instrument influences the dependent variable. This means that the expected value of the product of the instrument and the structural equation error term is equal to zero, $\mathbb{E}[z_ie_i]=0$ when the structural equation is given by: $y_i=\mathbf{x_i'\beta}+e_i$. For the _same_sex_ instrument it is easy to see that, since having the first two kids of the same sex is random, it should not have any direct influence on the labor-supply provision, both for mother and father. As for the _twins-2_ goes, things are not that clear it is not dependent on other mother's demographic characteristics, but anyway, having twins is largely a random variable and no one expects it to have any impact on the choice of labor-supply other than through the number of children. Eventhough, the authors have controlled for several other variables that may impact this instrument.
+The exclusion restriction is held when the instrument affects the dependent variable, $y$, _only_ through its effect on the regressor, that is, there is no other channel of transmission, direct or indirect, in which the instrument influences the dependent variable. This means that the expected value of the product of the instrument and the structural equation error term is equal to zero, $\mathbb{E}[z_ie_i]=0$ when the structural equation is given by: $y_i=\mathbf{x_i'\beta}+e_i$. For the _same_sex_ instrument it is easy to see that, since having the first two kids of the same sex is random, it should not have any direct influence on the labor-supply provision, both for mother and father. As for the _twins-2_ goes, things are not that clear it is not dependent on other mother's demographic characteristics, but anyway, having twins is largely a random variable and no one expects it to have any impact on the choice of labor-supply other than through the number of children. Even though, the authors have controlled for several other variables that may impact this instrument.
 
 **3. Now put yourself in the shoes of a referee evaluating the paper. Discuss different potential threats to the validity of these instruments.**
 
-First start with _twins-2_ instrument. There is some literature that relates having twins to maternal characteristics like age, height, weight, race and the use of fertility treatments, @Farbmacher2018 cites a few of them. Also, having dizygotic twins is largely influenced by genetic traits, @Painter2010, and so the conditional expectation of having twins for a woman who is first degree related to a dizygotic twin, or is a twin herself, is not the same as the general population. Women that undergo a fertility treatment are making a possible endogenous decision that we know raises the probability of having twins, and these treatments are evermore common nowadays. This decision may be endogenous since fertility treatment are not inexpensive and may be used by the very women who postponed their childbearing in favor of professional carrer, thus having an impact on labor-supply. These women will appear as having higher income and possibly working more hours per week, at the same time as having more children (twins inclusive).
+First start with _twins-2_ instrument. There is some literature that relates having twins to maternal characteristics like age, height, weight, race and the use of fertility treatments, @Farbmacher2018 cites a few of them. Also, having dizygotic twins is largely influenced by genetic traits, @Painter2010, and so the conditional expectation of having twins for a woman who is first degree related to a dizygotic twin, or is a twin herself, is not the same as the general population. Women that undergo a fertility treatment are making a possible endogenous decision that we know raises the probability of having twins, and these treatments are evermore common nowadays. This decision may be endogenous since fertility treatment are not inexpensive and may be used by the very women who postponed their childbearing in favor of professional career, thus having an impact on labor-supply. These women will appear as having higher income and possibly working more hours per week, at the same time as having more children (twins inclusive).
 
 The _twins-2_ indicator is constructed by the authors, it is not a mother's declaration that their kids are in fact twins. This poses some issues with the instrument created for example, the case where the husband is the father of one of the children and the kids happen to be about the same age (i.e. the same quarter). In this case the children would be deemed as twins, an assumption far from reality. Moreover, the fact that a single mother happens to find a suitable husband, father of a kid of the same ages as hers, might influence on the decision to get married and the marriage can have an impact on labor-supply decision. Also, it is known that twins have inferior endowments at birth, such as lower APGAR scores and lower health in general, than singletons. These differences might induce parents to stay home longer to take care of their children and this will violate the exclusion restriction.
 
@@ -95,7 +95,7 @@ Public policies that provide incentives to control fertility rates, like the one
 
 The relevance of the _same_sex_ instrument may decrease through time if parents are changing their preferences towards children of opposite sex. There also may be a great heterogeneity among countries on those preferences, @Hank2000 found it across 17 Western European countries and although on average parents had a tendency to prefer a mixed sex composition, it was not uncommon that there was countries in which parents had no preference at all. 
 
-And there are countries in which typically boys are preferred, for example China and other asian countries, [@Hesketh2011]. At these countries the practice of sex-selective abortion may tilt the odds of having two kids of the same sex, thus rendering the instrument as not random and opening the possibility it is related to aspects of labor-supply. 
+And there are countries in which typically boys are preferred, for example China and other Asian countries, [@Hesketh2011]. At these countries the practice of sex-selective abortion may tilt the odds of having two kids of the same sex, thus rendering the instrument as not random and opening the possibility it is related to aspects of labor-supply. 
 
 **5. Select a country and a census year from [IPUMS](https://international.ipums.org/international/index.shtml). Estimate the effects of family size on parents’ labor supply using this sample. Each student should choose a different sample. Once you select your sample, sign up in the google doc to guarantee no one else is using the same sample [(link)](https://docs.google.com/spreadsheets/d/1tI9acQk0LdPMhXMwQoVlOex1fnxsqmf8-anfytZoZgc/edit?usp=sharing). Submit a well-polished table with the results. Analyse how your results differ from @Angrist1998 . Submit your codes in an appendix.**
 
@@ -337,23 +337,20 @@ where $\bar{y}_1$ is the mean of $y_i$ for the observations when $z_i=1$.
 
 And finally, for the complete IV specification we have that:
 
-\begin{equation}
-x_i=\pi_1 s_{1i} + \pi_2 s_{2i} + \gamma same\_sex_i+\eta_i
-(\#eq:first-stage)
-\end{equation}
-
-\begin{equation}
-y_i=\alpha_1 s_{1i}+\alpha_2 s_{2i}+\beta x_i+\varepsilon_i
+\begin{align}
+x_i&=\pi_1 s_{1i} + \pi_2 s_{2i} + \gamma same\_sex_i+\eta_i
+(\#eq:first-stage)\\
+y_i&=\alpha_1 s_{1i}+\alpha_2 s_{2i}+\beta x_i+\varepsilon_i
 (\#eq:structural)
-\end{equation}
+\end{align}
 
 where the control variables for sex are $s_{1i}$ and $s_{2i}$ for first and second child respectively, which equal one if the child's gender is male. Equation \@ref(eq:first-stage) is called the first stage in a two-stage least squares framework, while equation \@ref(eq:structural) is the structural model where we have an interest on $\beta$.
 
-Below we present table \@ref(tab:table5) comparing results among these three models on one subsample of interest. All women between ages 21-35 with two or more children. As one can notice, the results achived are way off our reasonable prior belief for the impact of childbearing to women labor-supply. The results stem from the fact that our variable of interest, _hours of work per week_, were collect from IPUMS website as **harmonized** variable. This means the raw data from Swiss administration has been transformed and aggregated in order to produce a value comparable to other countries. The problem with this approach is that it may result in inaccurate values after data processing, as it seems to be the current case. 
+Below we present table \@ref(tab:table5) comparing results among these three models on one subsample of interest. All women between ages 21-35 with two or more children. As one can notice, the results achieved are way off our reasonable prior belief for the impact of childbearing to women labor-supply. The results stem from the fact that our variable of interest, _hours of work per week_, were collect from IPUMS website as **harmonized** variable. This means the raw data from Swiss administration has been transformed and aggregated in order to produce a value comparable to other countries. The problem with this approach is that it may result in inaccurate values after data processing, as it seems to be the current case. 
 
 If we take a look at the values for all women, mothers or not, working for payment, one can see we have `r nrow(all_women)` observations and `r sum(all_women$HRSWORK1 == 140)` of these "have declared" to work 140 hours per week or more! This is about `r format(sum(all_women$HRSWORK1 == 140)/nrow(all_women) * 100, digits = 0)`% of our entire universe of working women. Our best guess about what is going on here is that when harmonizing the variable, IPUMS has summed up hours of work in all jobs, which is the right procedure, with "Number of weekly hours: housework and caring for the family" which is one of the question the respondent answer in source questionnaire. 
 
-Unfortunatelly our time is short and I could not work out a solution to this problem. I believe the procedure so far is correct, from downloading data, manipulate it, create the instruments and deriving descriptive statistics, and all the R source code is provided in an appendix.
+Unfortunately our time is short and I could not work out a solution to this problem. I believe the procedure so far is correct, from downloading data, manipulate it, create the instruments and deriving descriptive statistics, and all the R source code is provided in an appendix.
 
 
 ```{r table5, results = "asis"}
@@ -388,11 +385,9 @@ As requested by email, even in the case we did not do the empirical part of this
 
 First we have to notice the exclusion condition, the instrument's exogeneity to regression errors is not directly testable. So, we must rely on our good arguments provided in question 2, that the instruments are indeed exogenous and valid.
 
-As for instrument relevance, we could test the sample correlation between the instrument and the regressor variable, fertility. This correlation should be different from zero, and the higher the better, in any direction. Eventhough, we do expect the correlation in the present case to be positive. We constructed instruments that point in the same direction of our regressor. Couples with first two children of the same sex tend to have more kids and the same goes for parents of twins at second pregnancy.
+As for instrument relevance, we could test the sample correlation between the instrument and the regressor variable, fertility. This correlation should be different from zero, and the higher the better, in any direction. Even though, we do expect the correlation in the present case to be positive. We constructed instruments that point in the same direction of our regressor. Couples with first two children of the same sex tend to have more kids and the same goes for parents of twins at second pregnancy.
 
-Other ways of testing instrument validity are robustness checks, just like the ones performed by the article's authors. 
-
-COMPLETE THIS PART ABOUT ROBUSTNESS CHECKS
+Other ways of testing instrument validity are robustness checks. We can design other regression models, using the same instruments, a composition of them or even a decomposition of _same sex_ in _two-boys_ and _two-girls_ to assess whether the new results go in the same direction as those obtained on the main regressions. For example, we could decompose _same-sex_ in two other instruments and test them separately or in a linear combination of them and verify the results. The authors actually performed such a regression and concluded that both instruments, _two-boys_ and _two-girls_ are always associated with more children and reduced labor supply, showing robustness for _same-sex_.
 
 ## Appendix
 
@@ -412,7 +407,7 @@ data <- read_ipums_micro(ddi)
 # workout on this sample first to debug algorithms
 serials <- sample(unique(data$SERIAL), 10000) 
 df <- data %>% 
-  filter(SERIAL %in% serials) %>%
+  filter(SERIAL %in% serials) %>% # Comment out this line for full DB
   filter(NFAMS == 1) %>% 
   select(SERIAL, PERSONS, NFAMS, MOMLOC, RELATE, AGE, SEX, HRSWORK1, PERNUM, 
          HEADLOC, CHBORN, NCOUPLES)
@@ -549,4 +544,5 @@ iv_reg <- ivreg(HRSWORK1 ~ sex1 + sex2 + fertility | sex1 + sex2 + same_sex,
                 data = women2135)
 iv_robse <- sqrt(diag(vcovHC(iv_reg, type = "HC1")))
 ```
+
 ## References {-}

@@ -1,0 +1,177 @@
+---
+title: "Problem Set 5"
+subtitle: São Paulo School of Economics - FGV/EESP
+author: "Rafael Felipe Bressan"
+date: "`r Sys.Date()`"
+output: 
+  bookdown::html_book:
+    highlight: tango
+    toc: false
+    number_sections: false
+---
+
+```{r setup, include=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(broom)
+library(AER)
+library(kableExtra)
+```
+
+## Question 3
+
+Let $v_{1i}$, $v_{2i}$, $v_{3i}$, $z_{1i}$, $z_{2i}$ be a sequence of 5 i.i.d $N(0,1)$ random variables. Consider the model:
+
+\begin{align}
+y_i &= β_0 + β_1 x_i + v_1i + v_2i\\
+x_i &= α_1 z_1i + α_2 z_2i + v_1i + v_3i
+\end{align}
+
+I will ask you in this question to run a simulation in Stata/R. Assume that $α_1 = α_2 = β_1 = β_2 = 1$. Generate 1000 random samples with 150 observations each, where in each replication you:
+
+1. Generate the random variables $v_1i$, $v_2i$, $v_3i$, $z_1i$, $z_2i$
+
+```{r item1}
+df_rnd <- tibble(sample_id = rep(1:1000, each = 150),
+                 v1 = rnorm(150*1000),
+                 v2 = rnorm(150*1000),
+                 v3 = rnorm(150*1000))
+z_mat <- matrix(rnorm(100*150*1000), nrow = 150000) # All z variables needed
+colnames(z_mat) <- paste0("z", 1:100)
+df_rnd <- cbind(df_rnd, z_mat)
+rm(z_mat) # Remove large matrix for memory efficiency
+```
+
+2. Generate $x_i$ and $y_i$ as a function of those random variables, using the definitions of $x_i$ and $y_i$ and the fact that $α_1 = α_2 = β_1 = β_2 = 1$.
+
+```{r item2}
+alpha1 <- 1
+alpha2 <- 1
+beta0 <- 0
+beta1 <- 1
+beta2 <- 1
+
+df <- df_rnd %>% 
+  mutate(x = alpha1*z1 + alpha2*z2 + v1 + v3,
+         y = beta0 + beta1*x + v1 + v2)
+rm(df_rnd) # Remove large data frame for memory efficiency
+```
+
+3. Run OLS regression of $y_i$ on $x_i$ and store the $β_1$ estimate for each sample.
+
+```{r item3, cache=TRUE}
+df_nest <- df %>% 
+  nest(data = -sample_id) %>% 
+  mutate(ols_reg = map(data, ~lm(y ~ x, data = .x)),
+         ols_tidy = map(ols_reg, tidy),
+         ols_reg = NULL) # drop original regressions for efficient memory use 
+```
+
+4. Run IV regression of $y_i$ on $x_i$ using $z_{1i}$ as instrument and store the $β_1$ estimate for each sample.
+
+```{r item4, cache=TRUE}
+df_nest <- df_nest %>% 
+  mutate(iv_reg = map(data, ~ivreg(y ~ x | z1, data = .x)),
+         iv_tidy = map(iv_reg, tidy),
+         iv_reg = NULL) # drop original regressions for efficient memory use
+```
+
+5. Run 2SLS regression of $y_i$ on $x_i$ using $z_1i$ and $z_2i$ as instruments and store the $β_1$ estimate for each sample.
+
+```{r item5, cache=TRUE}
+df_nest <- df_nest %>% 
+  mutate(two_reg = map(data, ~ivreg(y ~ x | z1 + z2, data = .x)),
+         two_tidy = map(two_reg, tidy),
+         two_reg = NULL) # drop original regressions for efficient memory use
+```
+
+(a) Report the mean and standard deviation of $\hat{\beta}_{1,OLS}$ . Is $\hat{\beta}_{1,OLS}$ consistent? Provide an intuition.
+
+```{r itema, results = "asis"}
+ols_suma <- df_nest %>% 
+  select(sample_id, ols_tidy) %>% 
+  unnest(ols_tidy) %>% 
+  filter(term == "x") %>% 
+  summarise(mean_beta = mean(estimate), mean_se = mean(std.error))
+
+kable(ols_suma, digits = 4,
+      caption = "OLS regression",
+      col.names = c("Mean beta", "Mean st. error")) %>% 
+  kable_styling(full_width = FALSE,
+                bootstrap_options = c("striped", "bordered"))
+```
+
+(b) Report the mean and standard deviation of $\hat{\beta}_{1,IV}$. Is $\hat{\beta}_{1,IV}$  consistent? Provide an intuition.
+
+```{r itemb, results = "asis"}
+iv_suma <- df_nest %>% 
+  select(sample_id, iv_tidy) %>% 
+  unnest(iv_tidy) %>% 
+  filter(term == "x") %>% 
+  summarise(mean_beta = mean(estimate), mean_se = mean(std.error))
+
+kable(iv_suma, digits = 4,
+      caption = "IV regression",
+      col.names = c("Mean beta", "Mean st. error")) %>% 
+  kable_styling(full_width = FALSE,
+                bootstrap_options = c("striped", "bordered"))
+```
+(c) Report the mean and standard deviation of $\hat{\beta}_{1,2SLS}$. Is $\hat{\beta}_{1,2SLS}$  consistent? How does the variance of $\hat{\beta}_{1,2SLS}$ compare to the variance of $\hat{\beta}_{1,IV}$? Provide an intuition.
+
+```{r itemc, results = "asis"}
+two_suma <- df_nest %>% 
+  select(sample_id, two_tidy) %>% 
+  unnest(two_tidy) %>% 
+  filter(term == "x") %>% 
+  summarise(mean_beta = mean(estimate), mean_se = mean(std.error))
+
+kable(two_suma, digits = 4,
+      caption = "2SLS regression",
+      col.names = c("Mean beta", "Mean st. error")) %>% 
+  kable_styling(full_width = FALSE,
+                bootstrap_options = c("striped", "bordered"))
+```
+
+(d) Now, add in your code a new random variable $z_{3i} ∼ N (0, 1)$, which is independent of all the other random variables. Run the simulation again, but now run a 2SLS regression including $z_{1i}$, $z_{2i}$, and $z_{3i}$ as instruments in your model. What is the mean and standard deviation of your estimator? How does this compare with the estimators in (c)? Provide an intuition.
+
+```{r itemd, cache=TRUE, results = "asis"}
+df_nest <- df_nest %>% 
+  mutate(z3_reg = map(data, ~ivreg(y ~ x | z1 + z2 + z3, data = .x)),
+         z3_tidy = map(z3_reg, tidy),
+         z3_reg = NULL) # drop original regressions for efficient memory use
+
+z3_suma <- df_nest %>% 
+  select(sample_id, z3_tidy) %>% 
+  unnest(z3_tidy) %>% 
+  filter(term == "x") %>% 
+  summarise(mean_beta = mean(estimate), mean_se = mean(std.error))
+
+kable(z3_suma, digits = 4,
+      caption = "2SLS regression. Z3 included",
+      col.names = c("Mean beta", "Mean st. error")) %>% 
+  kable_styling(full_width = FALSE,
+                bootstrap_options = c("striped", "bordered"))
+```
+
+(e) Now, I want you to add in your code a set of new random variables $z_{ki} ∼ N (0, 1)$, with $k = 3, ..., 100$. Run the simulation again, but now run a 2SLS regression including all the $z_{ki}$ variables, with $k = 1, ..., 100$, as instruments in your model. What is the mean and standard deviation of your estimator? How does this new estimator compare with the estimators in (a)-(d)?
+
+```{r iteme, cache=TRUE, results = "asis"}
+df_nest <- df_nest %>% 
+  mutate(all_z_reg = map(data, ~ivreg(y ~ x | . -v1-v2-v3, data = .x)),
+         all_z_tidy = map(all_z_reg, tidy),
+         all_z_reg = NULL) # drop original regressions for efficient memory use
+
+all_z_suma <- df_nest %>% 
+  select(sample_id, all_z_tidy) %>% 
+  unnest(all_z_tidy) %>% 
+  filter(term == "x") %>% 
+  summarise(mean_beta = mean(estimate), mean_se = mean(std.error))
+
+kable(all_z_suma, digits = 4,
+      caption = "2SLS regression. All Z's included",
+      col.names = c("Mean beta", "Mean st. error")) %>% 
+  kable_styling(full_width = FALSE,
+                bootstrap_options = c("striped", "bordered"))
+```
+
+Hint 1: you might be surprised with what you find! But to understand what is happening, you will have to take Microeconometrics.... I’m not asking you in this last item to provide an intuition for what you find.
