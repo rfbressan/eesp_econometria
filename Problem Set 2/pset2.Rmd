@@ -1,0 +1,118 @@
+---
+title: "Econometria I"
+subtitle: "Problem Set 2"
+author: "Rafael F. Bressan"
+date: "11 de março de 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraries, message=FALSE}
+# Load some necessary libraries
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(broom)
+```
+
+## Question 4
+
+In this question you will be asked to simulate OLS using Stata (submit your do-file).
+
+(a) Write a do-file that simulates 10.000 samples with 300 observations each of a model $Y_i = 10+0.1X_i+u_i$, where $X_i \sim N(2, 1)$ and $u_i \sim N(0, 1)$. Store the OLS estimate and the standard error of $\beta_1$ in each simulation. Plot the histogram of your $\beta1$ estimates. How does it look like?
+
+```{r item_a, cache=TRUE}
+# Simulation parameters
+n_samples <- 10000
+n_obs <- 300
+mu_x <- 2
+var_x <- 1
+mu_error <- 0
+var_error <- 1
+
+# True population parameters
+beta0 <- 10
+beta1 <- 0.1
+
+# Generate the data
+set.seed(12345)
+x_vec <- rnorm(n_samples*n_obs, mean = mu_x, sd = sqrt(var_x))
+u_vec <- rnorm(n_samples*n_obs, mean = mu_error, sd = sqrt(var_error))
+y_vec <- beta0 + beta1*x_vec + u_vec
+id_sample <- rep(1:n_samples, each = n_obs)
+
+# Data frame storing Y, X and sample id
+df <- data.frame(y = y_vec, x = x_vec, id_sample = id_sample) %>% 
+  group_by(id_sample)
+
+# OLS estimates
+ols_est <- df %>% 
+  nest() %>% 
+  mutate(ols = map(data, ~lm(y ~ x, data = .x)),
+         tidied = map(ols, tidy)) %>% 
+  unnest(tidied) %>% 
+  select(id_sample, term, estimate, std.error, statistic)
+
+beta1_est <- ols_est %>% 
+  filter(term == "x")
+
+# Histogram of beta1 estimates
+histo_plot <- ggplot(beta1_est, aes(x = estimate, y = stat(density))) +
+  geom_histogram(fill = "darkblue") +
+  geom_density() +
+  scale_color_viridis_c() +
+  theme_bw()
+```
+
+```{r histogram, message=FALSE}
+histo_plot
+```
+
+(b) Analyzing these 10.000 estimates of $\beta_1$, what is the mean and the standard error of $\beta_1$? Are these values similar to what you would predict?
+
+```{r item_b}
+mean(beta1_est$estimate)
+sd(beta1_est$estimate)
+```
+
+(c) For each simulation, calculate a test statistic to test the hypothesis that $\beta_1$ = 0.1 at 5% significance level. What is the critical value? What is the proportion of cases that you reject the null? Is this what you would expect?
+
+A test statistic would be $t = \left(\hat\beta_1 - 0.1\right) / sd(\hat\beta_1)$. It has a Student-t distribution with n_obs-2 degrees of freedom. For a 5% level of significance the critical value would be around 1.97.
+
+(d) For each simulation, calculate a test statistic to test the hypothesis that $\beta_1$ = 0.95, $\beta_1$ = 0.5 and $\beta_1$ = 0 at 5% significance level. What is the critical value? Do you reject the null more or less often than in the previous item? Is this what you would expect?
+
+Let's create another column on `beta1_est` data frame computing this statistic.
+
+```{r item_c, results='asis'}
+beta1_est <- beta1_est %>% 
+  mutate(t10 = (estimate - 0.10)/std.error,
+         t95 = (estimate - 0.95)/std.error,
+         t50 = (estimate - 0.5)/std.error,
+         t00 = (estimate - 0.0)/std.error)
+
+critical <- qt(0.975, n_obs - 2)
+sprintf("Critical value: %.4f", critical)
+
+# Data Frame with proportion of rejections of null for each test
+rejections <- beta1_est %>% 
+  ungroup() %>% 
+  transmute(rej10 = if_else(abs(t10) > critical, 1, 0),
+            rej95 = if_else(abs(t95) > critical, 1, 0),
+            rej50 = if_else(abs(t50) > critical, 1, 0),
+            rej00 = if_else(abs(t00) > critical, 1, 0)) %>% 
+  summarise(prop00 = mean(rej00),
+            prop10 = mean(rej10),
+            prop50 = mean(rej50),
+            prop95 = mean(rej95))
+knitr::kable(rejections)
+```
+
+(e) Repeat items (a)-(d) running the simulations with samples of 10, 30 and 1000 and 3000 observations. What do you find? Intuition?
+
+(f) Now, repeat items (a)-(d) imposing u i ∼ N (0, (x i ) 2 ).
+
+(g) Now, repeat items (a)-(d) imposing u i = −2 + x i + ε, where ε i ∼ N (0, 1).
