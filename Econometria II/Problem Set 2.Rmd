@@ -1,0 +1,62 @@
+---
+title: "Econometria II - Problem Set 2"
+author: "Rafael F. Bressan"
+date: "3 de junho de 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraries, message=FALSE}
+library(quantreg)
+library(sandwich)
+library(lmtest)
+library(texreg)
+library(stargazer)
+library(tidyverse)
+```
+
+# Computational questions
+
+## Question 3 (Quantile regression)
+
+Dataset consumer.csv stores information on a representative sample of American consumers in January, 2013.
+
+**a** _Suppose you are interested in understanding whether consumers have an understanding of the Taylor principle in monetary policy. You then decide to run the following model._
+
+$$PX1 = \gamma_0 + \gamma_1 RATEX + \gamma_2 UNEMP + \beta'X + u$$
+
+_where PX1 is the expected inflation rate in the subsequent 12 months, RATEX equals 1 if the individual thinks interest rates will be higher in 12 months, 0 if they will remain the same and -1 if they will go down 1 ; and UNEMP follows the {1, 0, −1} pattern for expectations over the change in the unemployment rate (1 if unemployment is expected to be higher). We also include controls of age (AGE), gender (SEX), family size (FAMSIZE) and the log of income (INCOME)._
+
+_Estimate the above model. Report your results (use robust standard errors) and comment on your estimates._
+
+### Solution
+
+```{r item-a, results='asis', message=FALSE}
+df <- read_csv("consumer.csv")
+reg_ols <- lm(PX1 ~ RATEX + UNEMP + AGE + SEX + FAMSIZE + log(INCOME),
+              data = df)
+tbl_test <- coeftest(reg_ols, vcov. = vcovHC, type = 'HC1')
+
+htmlreg(tbl_test, caption.above = TRUE, 
+        omit.coef = "(AGE)|(SEX)|(FAMSIZE)|(log(INCOME))",
+        caption = "OLS regression with robust standard errors.")
+```
+
+**b** _A friend of yours tells you that you should also run a quantile regression, as it would be interesting to see what happens at higher/lower quantiles of the (conditional) inflation expectation distribution. Run a quantile linear regression model using the controls in (a) for $\tau \in \{0.25, 0.5, 0.75\}$. Do not bootstrap standard errors! Interpret your estimates. What do they mean? What did you find? Hint: you may use the quantreg package. Note: We are not yet able to test hypotheses involving distinct quantiles, as we do not know the asymptotic covariance between these estimators. We’ll be able to do so once we see quantile regression in the context of GMM estimation._
+
+```{r item-b, results='asis'}
+df_q <- tibble(tau = c(0.25, 0.5, 0.75)) %>% 
+  rowwise() %>% 
+  mutate(reg_q = list(rq(PX1 ~ RATEX + UNEMP + AGE + SEX + FAMSIZE + log(INCOME),
+                    tau = tau,
+                    data = df)))
+
+stargazer(df_q$reg_q, type = 'html', header = FALSE,
+          title = "Quantile regression.",
+          column.labels = c("0.25", "0.5", "0.75"),
+          model.numbers = FALSE,
+          keep = c("RATEX", "UNEMP"))
+```

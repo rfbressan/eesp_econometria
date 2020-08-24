@@ -1,0 +1,530 @@
+---
+title: "Econometrics III - Problem Set 1"
+author: 
+  - "Bruna de A. Martins"
+  - "Rafael F. Bressan"
+  - "Victor H. de Oliveira"
+date: "`r format(Sys.Date(), format = '%d/%m/%Y')`"
+output: 
+  html_document:
+    highlight: espresso
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r libraries, message = FALSE}
+library(tidyverse)
+library(tsibble)
+library(fable)
+library(feasts)
+library(tidyquant)
+library(kableExtra)
+library(mFilter)
+```
+
+## PART 1: Theoretical Questions
+
+### **Question 1.** Answer TRUE, FALSE, or AMBIGUOUS to the items below. Justify your answers.
+
+a. A k-dimensional time series $z_{t}$ is weakly stationary if the joint distribution of $\left(z_{t}, \ldots, z_{t_{m}}\right)$ is the same as that of $\left(z_{t_{1}+j}, \ldots, z_{t_{m}+j}\right),$ where $m, j,$ and $\left(t_{1}, \ldots, t_{m}\right)$
+are arbitrary positive integers.
+
+FALSE. This is the strict stationarity definition.
+
+b. Let $\gamma(s)$ be the autocovariance function of a weakly stationary process $\left\{X_{t} ; t \in\right.$ $\mathbb{Z}\} .$ Then, $|\gamma(h)| \leq \gamma(0)$ and $\gamma(-h) \leq \gamma(h)$ for all $h \in \mathbb{Z}$.
+
+TRUE. A more precise statement would be that $|\gamma(h)| \leq \gamma(0)$ and $\gamma(-h) = \gamma(h)$ for all $h \in \mathbb{Z}$, but since this implies the item b statement, it is true.
+ 
+c. The autocorrelation function of an $\mathrm{AR}(\mathrm{p})$ process has a spike at the $p$ order.
+
+FALSE. It's the *Partial* autocorrelation function that has a spike (and only this spike) at lag $p$.
+
+d. A random walk is non-ergodic.
+
+TRUE. A random walk has increasing variance as $T\rightarrow\infty$, thus, it is not covariance stationary, therefore not ergodic. 
+
+e. The Wold's Decomposition Theorem states that any weakly stationary stochastic process can be decomposed into two mutually uncorrelated processes: a purely deterministic part and a purely stationary part.
+
+FALSE. It can be decomposed as a purely deterministic part and a purely *stochastic* part, which will be an $MA(\infty)$.
+
+f. The null hypothesis of the Ljung-Box test is that data exhibit serial correlation.
+
+FALSE. The null (joint) hypothesis of the Ljung-Box test is that data exhibit no serial correlation. If the null is rejected, then at least one lag is correlated to contemporaneous observations. 
+
+g. Consider the following two $\mathrm{MA}(1)$ process:
+
+$$
+\begin{array}{l}
+\text { A: } y_{t}=\theta \epsilon_{t-1}+\epsilon_{t} \\
+\text { B: } y_{t}=\hat{\theta} \epsilon_{t-1}+\hat{\epsilon}_{t}
+\end{array}
+$$
+
+where $\hat{\theta}=1 / \theta, \epsilon_{t}$ is a white noise with zero mean and variance $\sigma^{2},$ and $\hat{\epsilon}_{t}$ is a white noise with zero mean and variance $\hat{\sigma}^{2}=\sigma^{2} / \hat{\theta}^{2} .$ One can show that these two process have the same autocovariance generating function.
+
+TO DO YET
+
+h. The imposition of the invertibility condition on an MA process ensures that there is a unique MA process for a given autocorrelation function.
+
+TRUE. The invertibility condition guarantees that the MA process will have an $AR(\infty)$ representation. Suppose we can represent an invertible MA process of order $(q)$ as:
+
+\begin{equation}
+  Y_{t} = \mu + \prod_{i=1}^{q}(1-\lambda_{i}L)\tilde{\varepsilon}_{t}
+\end{equation}
+where
+
+\begin{equation}
+  \begin{array}\left{
+    | \lambda_{i} | < 1 \ , \ \text{for i=1,2,3...,n} \\
+    | \lambda_{i} | > 1 \ , \ \text{for i= n+1, n+ 2, n+ 3,...,q} \\
+  \end{array}
+\end{equation}
+and
+
+$$
+\begin{equation}
+  \operatorname{E}(\tilde{\varepsilon}_{t},\tilde{\varepsilon}_{T}) = \left\{ \begin{array}{lc}
+  \tilde{\sigma}^{2} , \text{for} \ t= T \\
+  0, \text{otherwise}
+  
+    \end{array}\right.
+\end{equation}
+$$
+
+Then, the invertible representation is given by
+
+$$
+\begin{equation}
+  Y_{t} = \mu_{t} + \left\{\prod_{i=1}^{n}(1-\lambda_{i}L)\right\}\left\{\prod_{i=n+1}^{q}(1-\lambda_{i}^{-1}L)\right\}\varepsilon_{t} \ , \quad \text{where} \ \  \operatorname{E}(\tilde{\varepsilon}_{t},\tilde{\varepsilon}_{T}) = \left\{ \begin{array}{lc}
+  \tilde{\sigma}^{2}\lambda_{n+1}^{2}... , \text{for} \ t= T \\
+  0, \text{otherwise}
+  
+    \end{array}\right.
+\end{equation}
+$$
+
+Then, the process have an identical autocovariance generating function, though only 2 satisfy the invertibility condition.
+
+Hence, the imposition of the invertilibity condition on a MA process ensures there is a unique MA process for a given autocorrelation function.
+
+i. The autocorrelation function of an invertible $MA(1)$ process always satisfies $\rho(1) \leq 0.5$
+
+FALSE. An invertible MA(1) process has a coefficient $|\theta|<1$, thus the autocorrelation of lag 1 is given by: $\rho(1)=\frac{\theta}{1+\theta^2} < 0.5$. Therefore, the inequality is strict. 
+
+j. Consider the stochastic process $y_{t}=c+\epsilon_{t}+\theta \epsilon_{t-1},$ where $\epsilon_{t}$ is a white noise with zero mean and variance $\sigma^{2} .$ Also, assume $|\theta|>1 .$ This process can be represented as an $\mathrm{AR}(-\infty)$
+
+TRUE. For instance, consider the  the stochastic process $y_{t}=c+\epsilon_{t}+\theta \epsilon_{t-1}$, where $\epsilon_{t} \overset{i.i.d}\sim u_t(0,\sigma^{2})$ and $|\theta| > 1$. Then,
+
+$$
+\begin{equation}
+    y_{t}=c+\epsilon_{t}+\theta \epsilon_{t-1}\\
+    y_{t} - c = (1+\theta L)\varepsilon_{t}\\
+    \varepsilon_{t} = \frac{y_{t} - c}{(1+\theta L)}
+\end{equation}
+$$
+
+One may notice that 
+
+$$
+\frac{1}{(1+\theta L)} = \frac{1}{(1+\theta L)} \frac{(\theta L)^{-1}}{(\theta L)^{-1}} = \frac{(\theta L)^{-1}}{1 + (\theta L)^{-1}}
+$$
+
+Then,
+
+$$
+\begin{equation}
+    (\theta L)^{-1}\frac{y_{t} - c}{1+(\theta L)^{-1}}=\varepsilon_{t} \\
+    \frac{y_{t} - c}{1+(\theta L)^{-1}}  = \theta \varepsilon_{t-1}
+\end{equation}
+$$
+
+since $|\theta| > 1$, we have $|\theta^{-1}| < 1$, which is invertible. Hence,
+
+$$
+\begin{equation}
+    \left(y_{t} - c\right)\left[1 - (\theta L)^{-1} + (\theta L)^{-2} - (\theta L)^{-3} + ...\right]  = \theta \varepsilon_{t-1}\\
+    (y_{t} - c) + \sum_{j=1}^{\infty}(-\theta)^{j}(y_{t} - c) = \theta \varepsilon_{t-1}\\
+    (y_{t} - c) = \sum_{j=1}^{\infty}(\theta)^{j}(y_{t} - c) + \theta \varepsilon_{t-1}
+\end{equation}
+$$
+resulting on $AR(-\infty)$ process.
+
+k. Let $y_{t}$ follow a $\mathrm{MA}(\infty)$ process: $y_{t}=\mu+\psi(L) \epsilon_{t},$ where $\psi(L)=\sum_{j=0}^{\infty} \psi_{j} L^{j}$
+$\sum_{j=0}^{\infty}\left|\psi_{j}\right|<\infty,$ and
+
+$$
+E\left(\epsilon_{t} \epsilon_{\tau}\right)=\left\{\begin{array}{ll}
+\sigma^{2} & \text { for } t=\tau \\
+0 & \text { otherwise }
+\end{array}\right.
+$$
+Then the autocovariance generating function for $y_{t}$ is given by $g_{Y}(z)=$ $\sigma^{2} \psi(z) / \psi\left(z^{-1}\right)$
+
+FALSE. The autocovariance generating function for $y_{t}$ is:
+
+$$
+  g_{y}(z)=\sigma^{2}\psi(z)\psi(z^{-1})
+$$
+
+One may notice that
+
+$$
+  \begin{array}{ll}
+  \text{MA}(1) \text{,} & \sigma^{2}(1+\theta_{1} z)(1+\theta_{1} z^{-1}) \\
+  \text{MA}(2) \text{,} &  \sigma^{2}(1+\theta_{1} z +\theta_{2} z^{2})(1+\theta_{1} z^{-1} + \theta_{2} z^{-2})\\
+  \vdots & \vdots \\
+  \text{MA}(\infty)& \sigma^{2}\psi(z)\psi(z^{-1}) =  g_{y}(z)\\  
+\end{array}
+$$
+
+l. The spectrum and the autocovariance function of a stochastic process are equivalent.
+
+
+m. For a white noise process, the population spectrum is constant for all frequencies $\omega$
+
+TRUE. The process contains equal power at all frequencies. From the previously exercise, one may notice that
+
+$$
+  \text{MA}(\infty) = \sigma^{2}\psi(z)\psi(z^{-1}) =  g_{y}(z)
+$$
+
+For a white noise, $\psi(z) = \psi(z^{-1}) = 1$. Then,
+
+$$
+  \begin{array}{cc}
+    g_{\varepsilon}(z) = \sigma^{2}\\
+    s_{\epsilon}(z) = \frac{\sigma^{2}}{2\pi}
+  \end{array}
+$$
+
+where both are constant. Also, this property is seen in the realization, which seems to contain all different frequencies in a roughly equal mix. In fact, the name white noise comes from the analogy to white light, which contains all frequencies in the color spectrum at the same level of intensity.
+
+n. The spectrum can be interpreted as a variance decomposition of a time series.
+
+TRUE. This can be seen by noticing that:
+
+$$
+  \int_{-\pi}^{\pi}s_{y}(w)e^{iw\kappa}\mathrm{d}w = \gamma_{\kappa}
+$$
+Hence, if $\kappa=0$, then
+
+$$
+  \int_{-\pi}^{\pi}s_{y}(w)\mathrm{d}w = \gamma_{0}
+$$
+
+
+## PART II: Practical Questions
+
+### **Question 2.** The purpose of this exercise is to examine in practice the basic properties of an $\mathrm{AR}(\mathrm{p})$ process.
+
+a. Simulate 1000 observations sampled from a standard normal distribution. Plot the time series and its histogram, and do a Jarque-Bera test. Analyze the correlogram of this process. Does it have memory?
+
+```{r 2a1, cache=TRUE}
+n <- 1000
+t <- 1:n
+set.seed(123456)
+u_norm <- rnorm(n)
+ts <- tsibble(t = t, u = u_norm, index = t)
+ggplot(ts, aes(x = t, y = u)) +
+  geom_line() +
+  theme_bw()
+```
+
+```{r 2a2, cache = TRUE, message=FALSE}
+ggplot(ts, aes(x = u)) +
+  geom_histogram(fill = "blue") +
+  theme_bw()
+```
+
+```{r 2a3, cache = TRUE, results = 'asis', message=FALSE}
+tseries::jarque.bera.test(ts$u) %>% 
+  broom::tidy() %>% 
+  kable(digits = 4) %>% 
+  kable_styling(full_width = FALSE)
+```
+
+```{r 2a4, cache=TRUE}
+ts %>% ACF(u) %>% autoplot()
+```
+
+Even though lags 1 and 3 are statistically different than zero, we cannot regard this series as having memory property.
+
+b. Using the same series simulated in (a), generate and plot the following AR processes. Analyze the correlogram and the dispersion chart of each series. Briefly discuss the results for each process.
+
+```{r 2b}
+coef <- list(c(0.1), c(0.95), c(0.1), c(0.95), c(0.5, 0.4), 
+             c(0.5, -0.4))
+intercept <- c(0, 0, 5, 5, 0, 0)
+models <- c("i", "ii", "iii", "iv", "v", "vi")
+df_ar <- tibble(models, coef, intercept) %>% 
+  rowwise() %>% 
+  mutate(order = length(coef),
+         ysim = list(
+           intercept / (1 - sum(coef)) + arima.sim(list(ar = coef), n, innov = ts$u, n.start = order + 1)),
+         tserie = list(bind_cols(ts, y = as.numeric(ysim)))) %>% 
+  ungroup()
+#' make_plots(df, model) Function to make all 3 plots
+make_plots <- function(df, model) {
+  tserie <- df %>% 
+  filter(models == model) %>% 
+  pull(tserie) %>% 
+  magrittr::extract2(1)
+  p1 <- autoplot(tserie, y)
+  p2 <- tserie %>% ACF(y) %>% autoplot()
+  p3 <- tserie %>% PACF(y) %>% autoplot()
+  p4 <- ggplot(tserie, aes(lag(y), y)) +
+    geom_point() +
+    geom_smooth(method = "lm") +
+    theme_classic()
+  
+  ggpubr::ggarrange(p1, p4, p2, p3, nrow = 2, ncol = 2)
+}
+```
+
+(i) $Y_{t}=0.1 Y_{t-1}+\epsilon_{t}$
+
+```{r 2bi, cache=TRUE, warning=FALSE, message=FALSE, fig.height=8, fig.width=8}
+make_plots(df_ar, "i")
+```
+ 
+ This generated AR(1) series barely has any memory, it is quite similar to a white noise.
+ 
+(ii) $Y_{t}=0.95 Y_{t-1}+\epsilon_{t}$
+
+```{r 2bii, cache=TRUE, warning=FALSE, message=FALSE, fig.height=8, fig.width=8}
+make_plots(df_ar, "ii")
+```
+ 
+ This AR(1) process has a great deal of memory, since current observation is highly correlated to past values. It's not close to a white noise at all. Much closer to a random walk.
+ 
+(iii) $Y_{t}=5+0.1 Y_{t-1}+\epsilon_{t}$
+ 
+```{r 2biii, cache=TRUE, warning=FALSE, message=FALSE, fig.height=8, fig.width=8}
+make_plots(df_ar, "iii")
+```
+
+(iv) $Y_{t}=5+0.95 Y_{t-1}+\epsilon_{t}$
+
+```{r 2biv, cache=TRUE, warning=FALSE, message=FALSE, fig.height=8, fig.width=8}
+make_plots(df_ar, "iv")
+```
+
+(v) $Y_{t}=0.5 Y_{t-1}+0.4 Y_{t-2}+\epsilon_{t}$
+
+```{r 2bv, cache=TRUE, warning=FALSE, message=FALSE, fig.height=8, fig.width=8}
+make_plots(df_ar, "v")
+```
+
+(vi) $Y_{t}=0.5 Y_{t-1}-0.4 Y_{t-2}+\epsilon_{t}$
+
+```{r 2bvi, cache=TRUE, warning=FALSE, message=FALSE, fig.height=8, fig.width=8}
+make_plots(df_ar, "vi")
+```
+
+(vii) $Y_{t}=Y_{t-1}+\epsilon_{t}$
+
+Since this is a random walk model, it's non-stationary and we cannot use the function arima.sim.
+
+```{r 2bvii, cache=TRUE, warning=FALSE, message=FALSE, fig.height=8, fig.width=8}
+y <- ts$u[1]
+for (i in 2:n) {
+  y[i] <- y[i - 1] + ts$u[i]
+}
+tsvii <- ts %>% 
+  mutate(y = y)
+p1 <- autoplot(tsvii, y)
+p2 <- tsvii %>% ACF(y) %>% autoplot()
+p3 <- tsvii %>% PACF(y) %>% autoplot()
+p4 <- ggplot(tsvii, aes(lag(y), y)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  theme_classic()
+ggpubr::ggarrange(p1, p4, p2, p3, nrow = 2, ncol = 2)
+```
+
+This is a random walk process! It has long memory as seen by its ACF, it is not stationary and current observation is highly correlated to past value. Actually, the best prediction for future observations is the current one.
+
+### **Question 3.** The purpose of this exercise is to examine in practice the basic properties of a MA(q) process.
+
+a. Using the same noise $\epsilon_{t}$ generated in the previous question, generate and plot the following MA(1) processes. Calculate the average and analyze the correlogram of each process. Briefly compare the results with the ones obtained in Question 2.
+
+Since all processes in this section are MA, the unconditional mean is always equal to the intercept. We need a dataframe with ma coefficients and then we can simulate all process at once.
+
+```{r 3a, cache=TRUE}
+coef <- list(c(-0.1), c(-0.95), c(-0.1), c(-0.95), c(0.5, 0.3, 0.1), 
+             c(0.5, -0.3, -0.1), c(1))
+intercept <- c(0, 0, 5, 5, 0, 0, 0)
+models <- c("i", "ii", "iii", "iv", "v", "vi", "vii")
+df <- tibble(models, coef, intercept) %>% 
+  rowwise() %>% 
+  mutate(order = length(coef),
+         ysim = list(
+           intercept + arima.sim(list(ma = coef), n, innov = ts$u, n.start = order + 1)),
+         tserie = list(bind_cols(ts, y = as.numeric(ysim)))) %>% 
+  ungroup()
+```
+
+(i) $Y_{t}=\epsilon_{t}-0.1 \epsilon_{t-1}$
+
+```{r 3ai, cache=TRUE, warning=FALSE, message=FALSE, fig.height=8, fig.width=8}
+make_plots(df, "i")
+```
+
+(ii) $Y_{t}=\epsilon_{t}-0.95 \epsilon_{t-1}$
+
+```{r 3aii, cache=TRUE, warning=FALSE, message=FALSE, fig.height=8, fig.width=8}
+make_plots(df, "ii")
+```
+
+(iii) $Y_{t}=5+\epsilon_{t}-0.1 \epsilon_{t-1}$
+
+```{r 3aiii, cache=TRUE, warning=FALSE, message=FALSE, fig.height=8, fig.width=8}
+make_plots(df, "iii")
+```
+
+(iv) $Y_{t}=5+\epsilon_{t}-0.95 \epsilon_{t-1}$
+
+```{r 3aiv, cache=TRUE, warning=FALSE, message=FALSE, fig.height=8, fig.width=8}
+make_plots(df, "iv")
+```
+
+(v) $Y_{t}=0.5 \epsilon_{t-1}+0.3 \epsilon_{t-2}+0.1 \epsilon_{t-3}+\epsilon_{t}$
+
+```{r 3av, cache=TRUE, warning=FALSE, message=FALSE, fig.height=8, fig.width=8}
+make_plots(df, "v")
+```
+
+(vi) $Y_{t}=0.5 \epsilon_{t-1}-0.3 \epsilon_{t-2}-0.1 \epsilon_{t-3}+\epsilon_{t}$
+
+```{r 3avi, cache=TRUE, warning=FALSE, message=FALSE, fig.height=8, fig.width=8}
+make_plots(df, "vi")
+```
+
+(vii) $Y_{t}=\epsilon_{t}+\epsilon_{t-1}$
+
+```{r 3avii, cache=TRUE, warning=FALSE, message=FALSE, fig.height=8, fig.width=8}
+make_plots(df, "vii")
+```
+
+### **Question 4. [OPTIONAL]** This question is about spectrum and filters. Download the quarterly index Real GDP for Brazil from IBGE website. Apply the logarithm, multiply by 100 and calculate the year-over-year growth rate $\left(100\left[\log \left(G D P_{t}\right)-\log \left(G D P_{t-4}\right)\right]\right)$
+
+```{r gdp_down, cache=TRUE}
+# Gets the GDP serie 22099 from Bacen
+gdp <- BETS::BETSget(22099, data.frame = TRUE) %>% 
+  as_tibble() %>% 
+  filter(date >= "1996-01-01") %>% 
+  mutate(lgdp = log(value),
+         gr = 100*(lgdp - lag(lgdp, 4))) %>% 
+  drop_na()
+```
+
+```{r gdp_plot, cache=TRUE}
+gdp %>% 
+  ggplot(aes(x = date, y = value)) +
+  geom_line() +
+  labs(title = "Total Gross Domestic Product for Brazil",
+       y = "Real GDP index (1995 = 100)") + 
+  theme_classic()
+```
+
+```{r growth_plot, cache=TRUE}
+gdp %>% 
+  ggplot(aes(x = date, y = gr)) +
+  geom_col() +
+  labs(title = "GDP Growth Rate for Brazil",
+       y = "growth rate") + 
+  theme_classic()
+```
+
+a Estimate and plot the spectrum for the growth rate. Which peaks in the spectrum corresponds to business cycles?
+
+```{r spectrum, cache=TRUE}
+# w <- seq(0, 0.5, 0.01)
+# #' Function to compute spectral density
+pop_spec <- function(X) {
+  # X is the time series to make the spectral analysis
+  spec <- spectrum(X, log = "no", method = "ar", plot = FALSE) # To smooth
+  return(spec$spec[,1]) # Returns only the spectra vector
+}
+
+spec <- spectrum(gdp$gr, log = "no", method = "ar", plot = FALSE)
+
+spec_df <- tibble(freq = spec$freq, sx_gr = spec$spec[,1])
+
+ggplot(spec_df, aes(x = freq, y = sx_gr)) +
+  geom_line() +
+  labs(title = "Spectral density of growth rate") +
+  theme_classic()
+
+# Period will be 1/Frequency, in units of observations (quarters)
+```
+
+Business cycles are associated with low frequencies, periods of years for example. Thus, the lower peak frequencies around 0.10 are the ones corresponding to business cycles in the economy. This leads to a BC period of 1/Freq = 10 quarters. 
+
+b Use the following three cycle removing devices: HP Filter ( 1600 ), Baxter-King Filter, Quadratic detrending. Plot and compare the results.
+
+```{r filters, cache=TRUE}
+#quad_trend <- seq_along(gdp$lgdp)^2
+gdp$t <- seq_along(gdp$lgdp)
+fit_quad <- lm(lgdp ~ t + I(t^2), data = gdp)
+
+# Run Filters
+hp_gdp <- hpfilter(gdp$lgdp, freq = 1600)
+bk_gdp <- bkfilter(gdp$lgdp)
+
+# Add the cyclical component of the HP filter and
+# the linearly detrended sereis to the main data frame
+filters_gdp <- gdp %>%
+  mutate(hp_cycle = hp_gdp$cycle,
+         hp_trend = hp_gdp$trend,
+         bk_cycle = bk_gdp$cycle,
+         bk_trend = bk_gdp$trend,
+         qt_trend = predict(fit_quad),
+         qt_cycle = residuals(fit_quad))
+```
+
+```{r cycle_plot, cache=TRUE}
+filters_gdp %>% 
+  pivot_longer(-date, names_to = "variable", values_to = "value") %>% 
+  drop_na() %>% 
+  filter(variable %in% c("hp_cycle", "bk_cycle", "qt_cycle")) %>% 
+  ggplot(aes(date, value, color = variable)) +
+  labs(y = "Log GDP") +
+  geom_line() +
+  theme_classic()
+```
+
+```{r trend_plot, cache=TRUE}
+filters_gdp %>% 
+  pivot_longer(-date, names_to = "variable", values_to = "value") %>% 
+  drop_na() %>% 
+  filter(variable %in% c("hp_trend", "bk_trend", "qt_trend")) %>% 
+  ggplot(aes(date, value, color = variable)) +
+  labs(y = "Log GDP") +
+  geom_line() +
+  theme_classic()
+```
+
+c Re-estimate the spectrum after applying each of the three cycle removing procedures. Draw the spectrum functions. Discuss the differences.
+
+```{r spec_filtered, cache=TRUE}
+# spec_hp <- spectrum(filters_gdp$hp_cycle, log = "no", method = "ar", plot = FALSE)
+# spec_bk <- spectrum(na.omit(filters_gdp$bk_cycle), log = "no", method = "ar", plot = FALSE)
+# spec_qt <- spectrum(filters_gdp$qt_cycle, log = "no", method = "ar", plot = FALSE)
+spec_df <- spec_df %>%
+  mutate(sx_hp = pop_spec(filters_gdp$hp_cycle),
+         sx_bk = pop_spec(na.omit(filters_gdp$bk_cycle)),
+         sx_qt = pop_spec(filters_gdp$qt_cycle))
+         
+spec_df %>% 
+  pivot_longer(-freq, names_to = "variable", values_to = "value") %>% 
+  filter(variable != "sx_gr") %>% 
+  ggplot(aes(x = freq, y = value, color = variable)) +
+  geom_line() +
+  labs(title = "Spectral comparison") +
+  theme_classic()
+```
+
+First we discuss the similarities. All three filters uncovered a cyclical component at frequency about 0.25, period of 4 quarters. That is clearly a seasonal component in our GDP series, which we remind is not seasonally adjusted. For the differences, the Baxter-King filter were not able to detect a cyclical component around frequency 0.8. This is due to the characteristic of BK filter with default values. It is not as a low-pass filter as HP, thus it captures the business cycle frequency in its trend, filtering even relatively high frequencies in its cycle. The Hodrick-Prescott filter was able to detect the business cycle at frequency 0.8, proving its usefulness to analyze cycles of relative low frequencies. The quadratic trend filter is not particularly good at low frequencies since it fitted a global concave function as its trend, the cycle remaining is comprised by a very low frequency, high magnitude cycle that lasts several years, completely dominating the business cycle of 10 quarters.

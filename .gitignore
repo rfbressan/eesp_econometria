@@ -9,3 +9,5 @@ libs
 AngEv98
 *.dta
 problem_set_3_cache
+*_cache
+*_files

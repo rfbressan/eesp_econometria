@@ -1,0 +1,596 @@
+---
+title: "Problem Set 1"
+author: "Víctor Henriques de Oliveira"
+date: "14/08/2020"
+output: html_document
+---
+
+```{r setup, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Part 1: Theoretical Questions
+
+Question 1. Sol TRUE, FALSE, or AMBIGUOUS to the items below. Justify your Sols.
+
+a. A k-dimensional time series $z_{t}$ is weakly stationary if the joint distribution of $\left(z_{t}, \ldots, z_{t_{m}}\right)$ is the same as that of $\left(z_{t_{1}+j}, \ldots, z_{t_{m}+j}\right),$ where $m, j,$ and $\left(t_{1}, \ldots, t_{m}\right)$ are arbitrary positive integers.\\
+
+**Sol:** Ambiguous. The statement here refers to a strictly stationary process, in which the joint distribution of $\{z_{t}\}_{t=1}^{T}$, that is $D(z_{t_{1}},...,z_{t_{1}})$, is exactly the same joint distribution of $D(z_{t_{1}+j},...,z_{t_{1}+j})$, although a strictly stationary process implies 
+weakly stationary process., the former can be relaxed. A weakly stationary process must satisfy the following conditions:
+
+(1) $E\left(X_{t}\right)=\mu<\infty \quad t=1,2, \cdots, \infty$
+(2) $E\left(X_{t}-\mu\right)\left(X_{t}-\mu\right)=\sigma^{2}=\gamma(0)<\infty$
+(3) $E\left(X_{t_{1}}-\mu\right)\left(X_{t_{2}}-\mu\right)=\gamma\left(t_{2}-t_{1}\right) \quad \forall t_{1}, t_{2}$\\
+
+
+b. Let $\gamma(s)$ be the autocovariance function of a weakly stationary process $\left\{X_{t} ; t \in\right.$ $\mathbb{Z}\} .$ Then, $|\gamma(h)| \leq \gamma(0)$ and $\gamma(-h) \leq \gamma(h)$ for all $h \in \mathbb{Z}$\\
+**Sol:**False. Although the autocovariance function of a weakly stationary process indeed requires $|\gamma(h)| \leq \gamma(0)$ when $\gamma(0) \geq 0$, the second part of the propostion are not correct, because $\gamma(-h)$ must be equal to $\gamma(h)$ for all $h \in \mathbb{Z}$ as a consequence of Cauchy-Schwarz inequality. To see this, recall that the autocorrelation function $\gamma(s)$ is given by
+
+$$
+  \gamma(0) 
+$$
+Note that $-1 \leq Corr(X_{t+s},X_{t+s})\leq 1$. Then
+$$
+  \begin{equation}
+    \begin{aligned}
+      & \gamma(s) =\left|\operatorname{Corr}(X_{t+s},X_{t})\right|\leq 1\\ 
+      & \\
+      & \Leftrightarrow \left|\frac{\operatorname{Cov}(X_{t+s},X_{t})}{\operatorname{Var}(X_{t+s})^{1/2}\operatorname{Var}(X_{t})^{1/2}}\right|\leq 1\\
+      & \\
+      & \Leftrightarrow \left|\operatorname{Cov}(X_{t+s},X_{t})\right| \leq \operatorname{Var}(X_{t+s})^{1/2}\operatorname{Var}(X_{t})^{1/2}
+    \end{aligned}
+  \end{equation}
+$$
+So, if $\gamma(0)$, then
+
+
+\begin{equation}
+    \begin{aligned}
+        \left|\operatorname{Cov}(X_{t},X_{t})\right| \leq & \operatorname{Var}(X_{t})^{1/2}\operatorname{Var}(X_{t})^{1/2}\\
+&|\operatorname{Var}(X_{t})| \leq \operatorname{Var}(X_{t})\\
+& \operatorname{Var}(X_{t}) - \operatorname{Var}(X_{t}) = 0
+    
+    \end{aligned}
+\end{equation}
+
+As a consequence of the absolute value, $\operatorname{Cov}(X_{t-h},X_{t}) = \operatorname{Cov}(X_{t},X_{t+h})$. Hence, $\gamma(h) = \gamma(-h) \ , \forall \ h \in \mathbb{Z}$.
+
+
+c. The autocorrelation function of an AR(p) process has a spike at the $p$ order.
+**Sol:** False. The Autocorrelation Function (AFC) process shows an exponencial decayment across the lags, while the same AR(p) process has a spike at the $p$ order at the Parcial Autocorrelation Function. For instance, suppose one observe a AR(1) process such as item $2.(\text{v)}$, where $y_{t} = 0.5y_{t-1} + 0.4y_{t-2} +\varepsilon_{t}$. Therefore, for a given $y_{t}$, one may observe the following ACF and PACF:
+
+```{r, include = FALSE}
+# library(ggplot2)
+# source('c:/Users/Olive/Documents/Github/Econometrics III/Problem sets/geom.corr.r')
+# ggplot.corr(data = df_ma[,5], lag.max = 50, ci= 0.95, large.sample.size = TRUE, horizontal = FALSE)
+
+```
+
+d. A random walk is non-ergodic.
+**True**. To satisfy the ergodic property a process, say $\{X_{t}\}_{t=1}^{T}$, must be stationary. Note that the random walk process without drift term can be expressed by
+
+\begin{equation}
+  X_{t} = X_{t-1} + \epsilon_{t}, \quad \epsilon \overset{i.i.d}\sim u_t(0,\sigma_{\epsilon}) 
+\end{equation}
+
+Thus, one may rewrite the above process recursively
+
+\begin{equation}
+  \begin{aligned}
+    X_{t} & = X_{t-1} + \epsilon_{t}\\ 
+          & = X_{t-2} + \epsilon_{t-1} +\epsilon_{t}\\
+          & = \cdots\\
+          & = X_{0} + \sum_{i=1}^{t}\epsilon_{i}
+          
+  \end{aligned}
+\end{equation}
+Hence, the weak stationary properties can be verify
+
+$$
+\begin{equation}
+   \operatorname{E}(X_{t}) = \operatorname{E}\left(X_{0} + \sum_{i=1}^{t}\epsilon_{i}\right)\\
+ \operatorname{E}(X_{t}) =  \operatorname{E}\left(X_{0}\right) + \operatorname{E}\left(\sum_{i=1}^{t}\epsilon_{i}\right)\\
+\operatorname{E}(X_{t}) =  \operatorname{E}\left(X_{0}\right) + \sum_{i=1}^{t}\operatorname{E}\left(\epsilon_{i}\right)\\
+ \operatorname{E}(X_{t}) = 0 
+\end{equation}
+$$
+where we suppose that $\operatorname{E}\left(X_{0}\right) = 0$.  Hence, the random walk process has a constant expected value. On the other hand, 
+$$
+\begin{aligned}
+   \operatorname{Var}(X_{t}) & =  \operatorname{Var}(X_{t-1} + \epsilon_{t})\\
+                           & =  \operatorname{E}\left[\left(X_{t-1} + \epsilon_{t}\right)^{2} \right] + \left[\operatorname{E}\left(X_{t-1} + \epsilon_{t}\right) \right]^{2}\\
+                           & = \operatorname{E}\left[\left(X_{t-1} + \epsilon_{t}\right)^{2} \right] + 0\\
+                           & = \operatorname{E}\left(X_{t-1}^{2} +2X_{t-1}\epsilon_{t} + \epsilon_{t}^{2} \right)\\
+                           & = \sigma^{2}t
+\end{aligned}
+$$
+the variance is time-dependent. Therefore, we conclude that a random walk is non-ergotic.
+
+e. The Wold's Decomposition Theorem states that any weakly stationary stochastic process can be decomposed into two mutually uncorrelated processes: a purely deterministic part and a purely stationary part.\\
+**Sol:** True. From propositon $4.1$ (Hamilton pg. 108-109, 1994) we knou_t that any zero-mean covariance-stationary process can be represented by
+
+$$
+  Y_{t} = \sum_{j=1}^{\infty}\psi \epsilon_{t-j} + \kappa_{t}
+$$
+where $\psi_{0}$ and $\sum_{i=1}^{\infty}\psi_{i}^{2} < \infty$. The term $\epsilon_{t}$ is the white noise and represents the error made in forecasting $Y_{t}$ on the basis of a linear function of lagged $Y$
+$$
+\varepsilon_{t} \equiv Y_{t}-E\left(Y_{t} \mid Y_{t-1}, Y_{t-2}, \ldots\right)
+$$
+The value of $\kappa_{t}$ is uncorrelated with $\varepsilon_{t-j}$ for any $j,$ though $\kappa_{t}$ can be predicted arbitrarily well from a linear function of past values of $Y:$
+$$
+  \kappa_{t}=\hat{E}\left(\kappa_{t} \mid Y_{t-1}, Y_{t-2}, \ldots\right)
+$$
+The term $\kappa_{t}$ is called the linearly deterministic component of $Y_{r},$ while $\Sigma_{j=0}^{\infty} \psi_{j} \varepsilon_{t-j}$ is called the linearly indeterministic component. If $\kappa_{t} \equiv 0,$ then the process is called purely linearly indeterministic.
+
+f. The null hypothesis of the Ljung-Box test is that data exhibit serial correlation.\\
+**Sol:** False. By definition, the Ljung-Box statistics is given by
+
+$$
+  \begin{equation}
+    Q^{*} = T(T+2)\sum_{k=1}^{m}\frac{\tilde{\rho}_{k}^{2}}{T-K} \thicksim \chi_{m}^{2}
+  \end{equation}
+$$
+where $\tilde{\rho}_{k}^{2}$ is the sample autocorrelation at $k$ lag, $T$ is the number of lags being tested. Thus, the null hypothesis -- data are independently distributed -- follows a chi-squared distribution with $m$ degrees of freedom. Hence, by rejecting the null hypothesis, one may infer that data exhibit serial correlation. 
+
+g. Consider the following two MA(1) process:
+$$
+\begin{array}{ll}
+\text { A: } & y_{t}=\theta \epsilon_{t-1}+\epsilon_{t} \\
+\text { B: } & y_{t}=\hat{\theta} \epsilon_{t-1}+\hat{\epsilon}_{t}
+\end{array}
+$$
+where $\hat{\theta}=1 / \theta, \epsilon_{t}$ is a white noise with zero mean and variance $\sigma^{2},$ and $\hat{\epsilon}_{t}$ is a white noise with zero mean and variance $\hat{\sigma}^{2}=\sigma^{2} / \hat{\theta}^{2}$. One can show that these two process have the same autocovariance generating function.
+
+
+h. The imposition of the invertibility condition on an MA process ensures that there is a unique MA process for a given autocorrelation function.\\
+**Sol:** True. Suppose we can represent a invertible representation for a MA process with $(q)$ order such as
+
+\begin{equation}
+  Y_{t} = \mu + \prod_{i=1}^{q}(1-\lambda_{i}L)\tilde{\varepsilon}_{t}
+\end{equation}
+where
+
+\begin{equation}
+  \begin{array}\left{
+    | \lambda_{i} | < 1 \ , \ \text{for i=1,2,3...,n} \\
+    | \lambda_{i} | > 1 \ , \ \text{for i= n+1, n+ 2, n+ 3,...,q} \\
+  \end{array}
+\end{equation}
+and
+
+
+$$
+\begin{equation}
+  \operatorname{E}(\tilde{\varepsilon}_{t},\tilde{\varepsilon}_{T}) = \left\{ \begin{array}{lc}
+  \tilde{\sigma}^{2} , \text{for} \ t= T \\
+  0, \text{otherwise}
+  
+    \end{array}\right.
+\end{equation}
+$$
+Then, the invertible representation is given by
+$$
+\begin{equation}
+  Y_{t} = \mu_{t} + \left\{\prod_{i=1}^{n}(1-\lambda_{i}L)\right\}\left\{\prod_{i=n+1}^{q}(1-\lambda_{i}^{-1}L)\right\}\varepsilon_{t} \ , \quad \text{where} \ \  \operatorname{E}(\tilde{\varepsilon}_{t},\tilde{\varepsilon}_{T}) = \left\{ \begin{array}{lc}
+  \tilde{\sigma}^{2}\lambda_{n+1}^{2}... , \text{for} \ t= T \\
+  0, \text{otherwise}
+  
+    \end{array}\right.
+\end{equation}
+$$
+Then, the process have a identical autocovariance generating function, though only 2 satisfy the invertibility condition.
+
+Hence, the imposition of the invertilibity condition on a MA process ensures that there is a unique MA process for a given autocorrelation function.
+
+
+i. The autocorrelation function of a invertible MA(1) process always satisfies $\rho(1) \leq 0.5$\\
+**Sol:** False. Take for instance the MA(1) process:
+
+\begin{equation}
+  y_{t} = \varepsilon_{t} + \theta \varepsilon_{t-1} 
+\end{equation}
+where we assume that $|\theta| < 1$. From Autocorrelation Function, $\gamma(0)$ and $\gamma(1)$ is represented by
+
+\begin{equation}
+  \begin{array}{l}
+    \gamma(0) = \sigma^{2}(1+\theta^{2})\\
+    \gamma(1) = \sigma^{2}\theta^{2})
+  \end{array}
+\end{equation}
+so, the ratio $\frac{\gamma(1)}{\gamma(0)} = \frac{\theta}{1+\theta^{2}}$
+
+Since the MA(1) is invertible, $1 < \theta < 1 $. Hence,
+
+\begin{equation}
+  \begin{array}{l}
+    \rho(1) = 0.5\\
+    \rho(-1) = -0.5
+  \end{array}
+\end{equation}
+
+Taking the first and second derivatives w.r.t $\theta$
+$$
+\begin{equation}
+  \begin{array}{l}
+      \frac{\mathrm{d}\rho(\theta)}{\mathrm{d}\theta} = \frac{1 - \theta^{2} }{(1+\theta^{2})^{2}}\\
+      \frac{\mathrm{d}^{2}\rho(\theta)}{\mathrm{d}\theta^{2}} = \frac{-2\theta(1+\theta^{2})^{2} - 4(1-\theta^{2})(1+\theta^{2})\theta }{(1+\theta^{2})^{4}}
+  \end{array}
+\end{equation}
+$$
+by noticing that 
+$$
+\begin{equation}
+  \begin{array}{ll}
+      \frac{\mathrm{d}\rho(\theta)}{\mathrm{d}\theta} = 0 \Leftrightarrow \theta^{2} = 1\\
+      \frac{\mathrm{d}^{2}\rho(1)}{\mathrm{d}\theta^{2}} < 0 & \frac{\mathrm{d}^{2}\rho(-1)}{\mathrm{d}\theta^{2}} > 0
+  \end{array}
+\end{equation}
+$$
+we conclude that $\frac{\gamma(1)}{\gamma(0)} < 0$.
+
+
+
+j. Consider the stochastic process $y_{t}=c+\epsilon_{t}+\theta \epsilon_{t-1},$ where $\epsilon_{t}$ is a white noise with zero mean and variance $\sigma^{2}$. Also, assume $|\theta|>1$. This process can be represented as an $\operatorname{AR}(-\infty)$.\\
+**Sol:** True. For instance, consider the  the stochastic process $y_{t}=c+\epsilon_{t}+\theta \epsilon_{t-1}$, where $\epsilon_{t} \overset{i.i.d}\sim u_t(0,\sigma^{2})$ and $|\theta| > 1$. Then,
+
+$$
+\begin{equation}
+    y_{t}=c+\epsilon_{t}+\theta \epsilon_{t-1}\\
+    y_{t} - c = (1+\theta L)\varepsilon_{t}\\
+    \varepsilon_{t} = \frac{y_{t} - c}{(1+\theta L)}
+\end{equation}
+$$
+One may notice that 
+$$
+\frac{1}{(1+\theta L)} = \frac{1}{(1+\theta L)} \frac{(\theta L)^{-1}}{(\theta L)^{-1}} = \frac{(\theta L)^{-1}}{1 + (\theta L)^{-1}}
+$$
+Then,
+$$
+\begin{equation}
+    (\theta L)^{-1}\frac{y_{t} - c}{1+(\theta L)^{-1}}=\varepsilon_{t} \\
+    \frac{y_{t} - c}{1+(\theta L)^{-1}}  = \theta \varepsilon_{t-1}
+\end{equation}
+$$
+since $|\theta| > 1$, we have $|\theta^{-1}| < 1$, which is invertible. Hence,
+$$
+\begin{equation}
+    \left(y_{t} - c\right)\left[1 - (\theta L)^{-1} + (\theta L)^{-2} - (\theta L)^{-3} + ...\right]  = \theta \varepsilon_{t-1}\\
+    (y_{t} - c) + \sum_{j=1}^{\infty}(-\theta)^{j}(y_{t} - c) = \theta \varepsilon_{t-1}\\
+    (y_{t} - c) = \sum_{j=1}^{\infty}(\theta)^{j}(y_{t} - c) + \theta \varepsilon_{t-1}
+\end{equation}
+$$
+resulting on AR($\infty$) process.
+
+
+k. Let $y_{t}$ follow a MA $(\infty)$ process: $y_{t}=\mu+\psi(L) \epsilon_{t},$ where $\psi(L)=\sum_{j=0}^{\infty} \psi_{j} L^{j}$
+$\sum_{j=0}^{\infty}\left|\psi_{j}\right|<\infty,$ and
+
+$$
+E\left(\epsilon_{t} \epsilon_{\tau}\right)=\left\{\begin{array}{lr}
+\sigma^{2} & \text { for } t=\tau \\
+0 & \text { otherwise }
+\end{array}\right.
+$$
+Then the autocovariance generating function for $y_{t}$ is given by $g_{Y}(z)=$ $\sigma^{2} \psi(z) / \psi\left(z^{-1}\right)$
+
+**Sol** False. The autocovariance generating function for $y_{t}$ is:
+$$
+  g_{y}(z)=\sigma^{2}\psi(z)\psi(z^{-1})
+$$
+One may notice that
+$$
+  \begin{array}{ll}
+  \text{MA}(1) \text{,} & \sigma^{2}(1+\theta_{1} z)(1+\theta_{1} z^{-1}) \\
+  \text{MA}(2) \text{,} &  \sigma^{2}(1+\theta_{1} z +\theta_{2} z^{2})(1+\theta_{1} z^{-1} + \theta_{2} z^{-2})\\
+  \vdots & \vdots \\
+  \text{MA}(\infty)& \sigma^{2}\psi(z)\psi(z^{-1}) =  g_{y}(z)\\  
+\end{array}
+$$
+
+
+l. The spectrum and the autocovariance function of a stochastic process are equivalent.\\
+**Sol:**
+
+m. For a white noise process, the population spectrum is constant for all frequencies $\omega$.\\
+**Sol:** True. The process contains equal power at all frequencies. From the previously exercise, one may notice that
+
+$$
+  \text{MA}(\infty) = \sigma^{2}\psi(z)\psi(z^{-1}) =  g_{y}(z)
+$$
+For a white noise, $\psi(z) = \psi(z^{-1}) = 1$. Then,
+
+$$
+  \begin{array}{cc}
+    g_{\varepsilon}(z) = \sigma^{2}\\
+    s_{\epsilon}(z) = \frac{\sigma^{2}}{2\pi}
+  \end{array}
+$$
+where both are constant. Also, this property is seen in the realization, which seems to contain all different frequencies in a roughly equal mix. In fact, the name white noise comes from the analogy to white light, which contains all frequencies in the color spectrum at the same level of intensity.*(check if its really true)*\\
+
+n. The spectrum can be interpreted as a variance decomposition of a time series.\\
+**Sol:** True. This can be seen by noticing that:
+
+$$
+  \int_{-\pi}^{\pi}s_{y}(w)e^{iw\kappa}\mathrm{d}w = \gamma_{\kappa}
+$$
+Hence, if $\kappa=0$, then
+
+$$
+  \int_{-\pi}^{\pi}s_{y}(w)\mathrm{d}w = \gamma_{0}
+$$
+
+## PART II: Practical Questions
+
+Question 2. The purpose of this exercise is to examine in practice the basic properties of an $\mathrm{AR}(\mathrm{p})$ process.
+
+a. simulate 1000 observations sampled from a standard normal distribution. Plot the time series and its histogram, and do a Jarque-Bera test. Analyze the correlogram of this process. Does it have memory?
+
+```{r, message = FALSE}
+library(tseries)
+library(ggplot2)
+library(cowplot)
+source('c:/Users/Olive/Documents/Github/Econometrics III/Problem sets/geom.corr.r')
+
+set.seed(1123581321) 
+
+t <- 1000
+
+u_t <- rep(0,t)
+
+for(i in 1:t){
+  
+  u_t[i] <- rnorm(1,0,1)
+  
+}
+
+
+time_series <-ggplot() + geom_line(aes(x=1:t,y=u_t)) +
+           geom_line(aes(x=1:t, y= 1.96),linetype ='longdash',col='red') +
+           geom_line(aes(x=1:t, y= -1.96),linetype ='longdash',col='red')+
+           labs(x = 'Time',y = bquote(u[t])) + ggtitle('White noise') + 
+           theme_grey() + theme(plot.title = element_text(size = 20),
+                               legend.title = element_blank(),
+                               legend.text = element_text(size = 15),
+                               axis.title = element_text(size = 15),
+                               axis.text = element_text(size=12))
+  
+histogram <-ggplot() +geom_histogram(aes(x=u_t,y = ..density..),
+        color="white", fill="black",linetype="solid",alpha = 0.5) +
+        geom_density(aes(x=u_t,y = ..density..), 
+                     color="red",fill="red", alpha =0.25) +
+                     labs(x = bquote(y[t]),y = 'Density') + 
+                     ggtitle('Histogram') + theme_grey() + 
+                     theme(plot.title = element_text(size = 20),
+                           legend.title = element_blank(),
+                           legend.text = element_text(size = 15),
+                           axis.title = element_text(size = 15),
+                           axis.text = element_text(size=12))
+            
+
+correlogram_ut <- ggplot.corr(data = u_t, lag.max = 50, ci= 0.95, large.sample.size = TRUE, horizontal = TRUE)
+
+plot_grid(time_series,histogram,correlogram_ut)
+
+jarque.bera.test(u_t)
+```
+As one can see, the process $y_{t}$ does not have any memory, because it is unpredictible
+
+
+b. Using the same series simulated in (a), generate and plot the following AR processes. Analyze the correlogram and the dispersion chart of each series. Briefly discuss the results for each process.
+
+(i) $Y_{t}=0.1 Y_{t-1}+\epsilon_{t}$
+(ii) $Y_{t}=0.95 Y_{t-1}+\epsilon_{t}$
+(iii) $Y_{t}=5+0.1 Y_{t-1}+\epsilon_{t}$
+(iv) $Y_{t}=5+0.95 Y_{t-1}+\epsilon_{t}$
+(v) $Y_{t}=0.5 Y_{t-1}+0.4 Y_{t-2}+\epsilon_{t}$
+$Y_{t}=0.5 Y_{t-1}-0.4 Y_{t-2}+\epsilon_{t}$
+(vii) $Y_{t}=Y_{t-1}+\epsilon_{t}$
+
+```{r, message=FALSE}
+
+yt1 <- u_t[1] # white noise
+
+yt2 = yt3 = yt4 = yt5 = yt6 = yt7 = yt1 
+
+for(i in 2:t){
+  
+    yt1[i] <- .1*yt1[i-1] + u_t[i]
+    yt2[i] <- .95*yt2[i-1]+ u_t[i]
+    yt3[i] <- 5 + .1*yt3[i-1]+ u_t[i]
+    yt4[i] <- 5 + .95*yt4[i-1]+ u_t[i]
+    yt7[i] <- yt7[i-1] + u_t[i]
+}
+
+yt5[2] <- .5*yt5[1] + u_t[2]
+
+yt6[2] <- .5*yt5[2] + u_t[2]
+
+for(j in 3:t){
+  
+  yt5[j] <- .5*yt5[j-1] + .4*yt5[j-2] + u_t[j]
+     
+  yt6[j] <- .5*yt6[j-1] - .4*yt6[j-2] + u_t[j]
+}
+
+
+df_ar <- cbind.data.frame(yt1,yt2,yt3,yt4,yt5,yt6,yt7)
+
+time_series_list <- vector(mode = 'list', length = 7)
+
+ar_function <- function(df_ar){
+
+  for(j in 1:7){
+    
+    plot_ar <- ggplot() + geom_line(aes(x=1:t,y= df_ar[,j])) +
+               geom_line(aes(x=1:t, y= mean(df_ar[,j]) + 1.96),
+                         linetype ='longdash',col='red') +
+               geom_line(aes(x=1:t, y= mean(df_ar[,j]) -1.96),
+                                  linetype ='longdash',col='red') +
+                  labs(x = 'Time',y = bquote(y[t])) + ggtitle(j) + 
+                  theme_grey() + theme(plot.title = element_text(size = 20),
+                                   legend.title = element_blank(),
+                                   legend.text = element_text(size = 15),
+                                   axis.title = element_text(size = 15),
+                                   axis.text = element_text(size=12))
+
+
+  print(plot_ar)
+  
+  }
+  # return(plot_grid(print(plot_ar)))
+}
+
+plot_grid(ar_function(df_ar=df_ar))
+
+# correlogram <- ggplot.corr(data = df_ar[,5], lag.max = 50, ci= 0.95, large.sample.size = TRUE, horizontal = TRUE)
+
+diagnostic_ar <- function(df_ar){
+
+for(j in 1:7){
+  
+correlogram <- ggplot.corr(data = df_ar[,j], lag.max = 30, ci= 0.95, large.sample.size = TRUE, horizontal = TRUE)
+
+dispersion_t1 <-ggplot() + geom_point(aes(x = df_ar[1:(t-1),j],y = df_ar[2:t,j]))
+
+dispersion_t5 <- ggplot() + geom_point(aes(x = df_ar[1:(t-5),j],y = df_ar[6:t,j]))
+
+dispersion_t20 <- ggplot() + geom_point(aes(x = df_ar[1:(t-20),j],y = df_ar[21:t,j]))
+
+par(mfrow=c(3,1))
+print(correlogram)
+print(dispersion_t1)
+print(dispersion_t5)
+print(dispersion_t20)
+# plot(correlogram,dispersion_t1,)
+  }
+}
+
+diagnostic_ar(df_ar=df_ar)
+
+```
+
+
+```{r,message=FALSE}
+
+
+yma1 <- u_t[1] # white noise
+
+yma2 = yma3 = yma4 = yma5 = yma6 = yma7 = yma1 
+
+for(i in 2:t){
+  
+    yma1[i] <- u_t[i] - .1*u_t[i-1] 
+    
+    yma2[i] <- u_t[i] - .95*u_t[i-1]
+    
+    yma3[i] <- 5 + u_t[i] - .1*u_t[i-1]
+    
+    yma4[i] <- 5 + u_t[i] - .95*yt4[i-1]
+      
+    yma7[i] <- u_t[i] + u_t[i-1]
+}
+
+yma5[2] <- u_t[2] + .5*u_t[1]
+yma5[3] <- u_t[3] + .5*u_t[2] + .3*u_t[1]
+
+yma6[2] <- u_t[2] + .5*u_t[1]
+yma6[3] <- u_t[3] + .5*u_t[2] - .3*u_t[1]
+
+for(j in 4:t){
+  
+  yma5[j] <- u_t[j] + .5*u_t[j-1] + .3*u_t[j-2] + 0.1*u_t[j-3] 
+     
+  yma6[j] <- u_t[j] + .5*u_t[j-1] - .3*u_t[j-2] - 0.1*u_t[j-3]
+}
+
+
+df_ma <- cbind.data.frame(yma1,yma2,yma3,yma4,yma5,yma6,yma7)
+
+ma_function <- function(df_ma){
+  
+  for(j in 1:7){
+    
+    plot_ma <- ggplot() + geom_line(aes(x=1:t,y= df_ma[,j])) +
+               geom_line(aes(x=1:t, y= mean(df_ma[,j]) + 1.96),
+                         linetype ='longdash',col='red') +
+               geom_line(aes(x=1:t, y= mean(df_ma[,j]) -1.96),
+                                  linetype ='longdash',col='red') +
+                  labs(x = 'Time',y = bquote(y[t])) + ggtitle(j) + 
+                  theme_grey() + theme(plot.title = element_text(size = 20),
+                                   legend.title = element_blank(),
+                                   legend.text = element_text(size = 15),
+                                   axis.title = element_text(size = 15),
+                                   axis.text = element_text(size=12))
+    
+    print(plot_ma)
+  
+  }
+  
+}
+
+ma_function(df_ma = df_ma)
+
+for(j in 1:7){
+  
+correlogram_ma <- ggplot.corr(data = df_ma[,j], lag.max = 50, ci= 0.95, large.sample.size = TRUE, horizontal = TRUE)
+
+scatter_ma_t1 <-ggplot() + geom_point(aes(x = df_ma[1:(t-1),j],y = df_ma[2:t,j]))
+
+scatter_ma_t5 <- ggplot() + geom_point(aes(x = df_ma[1:(t-5),j],y = df_ma[6:t,j]))
+
+scatter_ma_t20 <- ggplot() + geom_point(aes(x = df_ma[1:(t-20),j],y = df_ma[21:t,j]))
+
+plot_grid(correlogram_ma,scatter_ma_t1,scatter_ma_t5,scatter_ma_t20)
+}
+
+ggplot.corr(data = df_ma[,4], lag.max = 50, ci= 0.95, large.sample.size = TRUE, horizontal = TRUE)
+
+
+```
+
+
+```{r,include = FALSE}
+# library(mFilter)
+# library(sidrar)
+# library(readxl)
+# 
+# gdp <- read_xlsx('Tabela 1620.xlsx')
+# 
+# gdp$log <- log(gdp$Index)
+# 
+# gdp_yoy <- rep(0,93)
+# 
+# for(t in 5:97){
+#   
+#     gdp_yoy[t] <- 100*(log(gdp$Index[t]) - log(gdp$Index[t-4]))
+#     
+# }
+# 
+# spec <- spectrum(gdp_yoy, method = 'ar')
+# 
+# plot(spec)
+# 
+# fit_hp <- hpfilter(gdp_yoy, freq = 1600)
+#   
+# plot(hp_filter)
+#   
+# plot(gdp_yoy,type='l')
+# 
+# fit_bk <- bkfilter(gdp_yoy)
+# 
+# plot(baxter_k)
+# 
+# quad_trend <- (seq(1,length(gdp_yoy),1))^2
+# 
+# fit_quad <- lm(gdp_yoy ~ quad_trend)
+# 
+# plot(fit_quad$residuals,type='l')
+# 
+# par(mfrow=c(3,1))
+# 
+# spec_fit_hp <- spec
+
+
+
+# get_sidra(x = 1620,eriod = c("1998","201401-201412"))
+```
