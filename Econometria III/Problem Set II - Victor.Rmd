@@ -1,0 +1,273 @@
+---
+title: "Problem Set - 2"
+author: "Víctor Henriques de Oliveira"
+date: "01/09/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Part  1 : Theoretical Questions
+
+Question 1. Answer TRUE, FALSE or AMBIGUOUS to the items below. Justify your answers.
+
+consider the following covariance-stationary process: $(1-\phi L)\left(Y_{t}-\mu\right)=\epsilon_{t}$ Suppose you know the past values $\left\{Y_{t}, Y_{t-1}, Y_{t-2}, \ldots\right\}$. The optimal linear forecast s-periods ahead for this process is given by $\hat{E}\left[Y_{t+s} \mid Y_{t}, Y_{t-1}, \ldots\right]=$ $\mu+\phi^{s-1}\left(Y_{t}-\mu\right)$\\~\\
+**Sol:**TRUE. To see this, let be $\operatorname{E}(y_{t}) = \mu $ and:
+
+$$
+\begin{equation}
+  \begin{aligned}
+  \ & y_{t}  = \mu + \phi(y_{t-1} - \mu) + \varepsilon_{t} \\ 
+  \ & y_{t}  =  \mu + \phi y_{t-1} - \phi\mu + \varepsilon_{t} \\
+  \ & y_{t}(1-\phi L) - \mu(1-\phi L) = \varepsilon_{t} \\      
+  \ & (y_{t}-\mu)(1-\phi L)  =  \varepsilon_{t}
+  \end{aligned}
+\end{equation}
+$$
+Then, the optimal linear forecast forecast s-periods ahead for this process is given by
+
+$$
+\begin{equation}
+  \begin{array}{l}
+   \hat{\operatorname{E}}\left[y_{t+1} \ | \ y_{t},y_{t-1},... \right] = \mu + \phi(y_{t} - \mu)\\ 
+  \hat{\operatorname{E}}\left[y_{t+2} \ | \ y_{t},y_{t-1},... \right] = \phi\hat{\operatorname{E}}\left[y_{t+1} \ | \ y_{t},y_{t-1},... \right] + (1-\mu)\phi = \mu + \phi^{2}\left(y_{t} - \mu\right) \\
+  \vdots \\
+  \hat{\operatorname{E}}\left[y_{t+s} \ | \ y_{t},y_{t-1},... \right] = \mu + \phi \hat{\operatorname{E}}\left[y_{t+s-1} \ | \ y_{t},y_{t-1},... \right] = \mu + \phi^{2}(y_{t} - \mu)
+  \end{array}
+\end{equation}
+$$
+which was to be demonstrated.\\~\\
+
+b. Let $X_{t}=\pi X_{t-1}+u_{t}$ and $W_{t}=\rho W_{t-1}+v_{t}$ be two stationary $\mathrm{AR}(1)$ processes, with $\pi \neq \rho,$ and $u_{t}$ and $v_{t}$ are two uncorrelated white noises. Then $Y_{t}=$ $X_{t}+W_{t}$ is an $\operatorname{ARMA}(1,1)$\\~\\
+**Sol:**  FALSE (remember to change the notation). $Y_{t}$ is a ARMA(2,1) process. To see that, fist one may rewrite
+the first process taking the lag operator and then multiplying both sides by $(1-\rho)$, that is
+
+$$
+\begin{equation}
+  \begin{aligned}
+  \ & X_{t} - \pi x_{t-1} = u_{t} \\
+  \ & X_{t}(1-\pi L)= u_{t} \\
+  \ & X_{t}(1-\pi L)(1-\rho) = (1-\rho)u_{t}
+  
+  \end{aligned}
+\end{equation}
+$$
+
+Similarly, 
+
+$$
+\begin{equation}
+  \begin{aligned}
+  \ & W_{t} - \rho W_{t-1} = v_{t} \\
+  \ & W_{t}(1-\rho L)= v_{t} \\
+  \ & W_{t}(1-\rho L)(1-\pi) = (1-\pi)v_{t}
+  \end{aligned}
+\end{equation}
+$$
+
+By taking the sum equations (1) and (2) on both sides, one may obtain
+
+$$
+\begin{equation}
+  \begin{aligned}
+  \ & X_{t}(1-\pi L)(1-\rho) + W_{t}(1-\rho L)(1-\pi) = (1-\rho)u_{t} + (1-\pi)v_{t} \\
+  \ & (X_{t}+W_{t})(1-\pi L)(1-\rho L) = (u_{t} + v_{t})(1-\pi L)(1-\rho L)
+  \end{aligned}
+\end{equation}
+
+$$
+
+Solving the LHS of equation (3)
+
+$$
+\begin{equation}
+  \begin{aligned}
+     (X_{t}+W_{t})(1-\pi L)(1-\rho L) \ & = (X_{t}+W_{t})(1- \pi L - \rho L + \pi\rho L^{2})\\
+     \ & = (X_{t}+W_{t})\left[1-(\phi+\rho)L + \pi\rho L^{2} \right]\\
+     \ & = (X_{t}+W_{t})(1 - \phi_{1} L + \phi_{2} L^{2})
+  \end{aligned}
+\end{equation}
+$$
+where one may define $\phi_{1} = \phi + \rho $ and $\phi_{2} = \pi \rho$, resultin on a AR(2) process.
+
+Solving for RHS,
+$$
+\begin{equation}
+  \begin{aligned}
+      (u_{t} + v_{t})(1-\pi L)(1-\rho L) \ & = u_{t}(1-\pi L)(1-\rho L) + v_{t}(1-\pi L)(1-\rho L)\\
+      \ & = u_{t}^{*}(1-\pi L) + v_{t}^{*}(1-\rho L)
+  \end{aligned}
+\end{equation}
+$$
+using the fact that 
+
+$$
+\begin{equation}
+  \begin{array}{cc}
+      u_{t}^{*} = u_{t}(1-\rho L) = u_{t} - \rho u_{t-1} & , \quad \text{   MA(1)}\\
+      v_{t}^{*} = v_{t}(1-\pi L) = v_{t} - \pi v_{t-1} & , \quad \text{   MA(1)}
+  \end{array}
+\end{equation}
+$$
+Define $y_{t} = u_{t} - \rho u_{t-1}$ and $z_{t} = v_{t} - \pi v_{t-1}$. Then, the autocovariance for the process $y_{t}$ can be written such as
+
+$$
+\begin{equation}
+  \begin{array}{ll}
+      \gamma_{y}(1) = \operatorname{Cov}(y_{t},y_{t-1}) = \operatorname{E}(y_{t}y_{t-1}) - \operatorname{E}(y_{t})\operatorname(y_{t-1}) = -\rho\sigma_{u}^{2} \ , & \text{for} \ \rho \neq 0\\
+      \gamma_{y}(h) = \operatorname{Cov}(y_{t},y_{t-h}) = \operatorname{E}(y_{t}y_{t-h}) - \operatorname{E}(y_{t})\operatorname(y_{t-h}) = 0 \ , & \text{for} \ h > 1\\
+  \end{array}
+\end{equation}
+$$
+equivalently, for $z_{t}$
+
+$$
+\begin{equation}
+  \begin{array}{ll}
+      \gamma_{z}(1) = \operatorname{Cov}(z_{t},z_{t-1}) = \operatorname{E}(z_{t}z_{t-1}) - \operatorname{E}(z_{t})\operatorname(y_{z-1}) = -\pi\sigma_{u}^{2} \ , & \text{for} \ \pi \neq 0\\
+      \gamma_{z}(h) = \operatorname{Cov}(z_{t},z_{t-h}) = \operatorname{E}(z_{t}z_{z-h}) - \operatorname{E}(z_{t})\operatorname(z_{t-h}) = 0 \ , & \text{for} \ h > 1\\
+  \end{array}
+\end{equation}
+$$
+Define $p_{r} = y_{t} + z_{t}$. Then, the autocovariance of the process $p_{t}$ is such that
+
+$$
+\begin{equation}
+  \begin{array}{ll}
+      \gamma_{p}(1) = \operatorname{Cov}(p_{t}p_{t-1}) = \operatorname{Cov}\left[(y_{t} + z_{t})(y_{t-1} + z_{t-1})\right] =  \operatorname{E}\left[(y_{t} + z_{t})(y_{t-1} + z_{t-1})\right] = \gamma_{y}(1) + \gamma_{z}(1)\\
+\gamma_{p}(h) = 0
+  \end{array}
+\end{equation}
+$$
+Hence, the RHS of (3) is a MA(1) process. Therefore, the sum of process $Y_{t}$ is indeed a ARMA(2,1).\\~\\
+
+c. The $\mathrm{AR}(3)$ models $y_{t}=0.4 y_{t-1}+0.4 y_{t-2}+0.2 y_{t-3}+\epsilon_{t}$ and $y_{t}=-0.4 y_{t-1}-0.4 y_{t-2}-0.2 y_{t-3}+\epsilon_{t}$ are both unit root processes.\\~\\
+**Sol:** FALSE. Consider the first process
+
+$$
+\begin{equation}
+  \begin{aligned}
+      \ & y_{t}=0.4 y_{t-1}+0.4 y_{t-2}+0.2 y_{t-3}+\epsilon_{t}\\
+      \ & y_{t}(1 - 0.4L - 0.4L^{2} - 0.2L^{3}) = \epsilon_{t}
+  \end{aligned}
+\end{equation}
+$$
+Hence, the lag operator is
+$$
+  \phi(L) = 1 - 0.4L - 0.4L^{2} - 0.2L^{3}
+$$
+Therefore, for $L=1$ the AR(3) process has a unit root, that is 
+$$\phi(1) = 1 - 0.4 - 0.4 - 0.2 = 0$$
+Now, consider
+
+$$
+\begin{equation}
+  \begin{aligned}
+    \ & y_{t}=-0.4 y_{t-1}-0.4 y_{t-2}-0.2 y_{t-3}+\epsilon_{t}\\
+    \ & y_{t}(1+0.4L+0.4L^{2}+0.2L^{2}) = \epsilon_{t}
+  \end{aligned}
+\end{equation}
+$$
+which the root s
+
+$$
+\begin{equation}
+  \begin{aligned}
+    \ & \phi(L) = 1 + 0.4L + 0.4L^{2} + 0.2L^{3}\\
+    \ & \phi(1) = 1 + 1 = 2 \neq 0
+  \end{aligned}
+\end{equation}
+$$
+that is, the root is outside of unit circle, implying that the second process is stationary.
+
+\\~\\
+d. If one try to difference a trend-stationary process, the result would be a stationary time series.\\~\\
+**Sol:**  FALSE. To see this, suppose a trend-stationary process such as
+$$ 
+  y_{t} = y_{0} + \delta t + \psi(L)\varepsilon_{t}
+$$
+Taking the first difference on equation above, one obtain:
+
+$$
+\begin{equation}
+  \begin{aligned}
+  \Delta y_{t} \ & = y_{t} - y_{t-1}\\
+  \ & = y_{0} + \delta t + \psi(L)\varepsilon_{t}- y_{0} + \delta t + \psi(L)\varepsilon_{t-1} \\
+  \ & = (t - t +1)\delta + \psi(L)(\varepsilon_{t} - \varepsilon_{t-1})\\
+  \ & = \delta + (1-L)\psi(L)\varepsilon_{t} 
+  \end{aligned}
+\end{equation}
+$$
+In fact, the first difference does remove the trend, but we cannot say that the resulting process is stationary time series anymore, once the transformation has added more noise noise into the process (melhorar a resposta).
+
+
+\\~\\
+
+e. The ACF and the PACF allow one to distinguish between a trend-stationary process from a unit-root process.\\~\\
+**Sol:** *Don't know yet (why?)*  
+
+\\~\\
+
+f. The Dickey-Fuller test is valid even if the errors are serially correlated and/or not normally distributed.\\~\\
+**Sol:**  
+
+g. The difference between the DF test and the ADF test is that the ADF eliminates the autocorrelation problem by including more lagged variables in the estimated AR process.\\~\\
+**Sol:**  
+
+h. If the ADF test statistic is positive, one can automatically decide not to reject the null hypothesis of a unit root.\\~\\
+**Sol:** False. The ADF test statistic is negative (why again?)   
+
+\\~\\
+i. The PP test corrects for any serial correlation and heteroskedasticity in the errors of the test regression by directly modifying the test statistics.\\~\\
+**Sol:**  
+
+\\~\\
+j. The DFGLS test is applied for the case that, under the null hypothesis, $y_{t}$ has a stochastic trend, possibly with drift, and under the alternative hypothesis $y_{t}$ is stationary around a linear time trend.\\~\\
+**Sol:**  
+
+\\~\\ 
+Question 2. This question is about state-space representation $^{1} .$ You are asked to put the following models in state-space form, i.e., write down the measurement equation and the transition equation for each model.
+a. $\mathrm{MA}(1): y_{t}=\epsilon_{t}+\theta \epsilon_{t-1}$ where $\epsilon_{t}$ is a white noise.\\~\\
+**Sol:**  
+
+b. Repeat the item above, but changing the representation.\\~\\
+**Sol:**  
+
+c. $\mathrm{AR}(3): y_{t}=\delta+\phi_{1} y_{t-1}+\phi_{2} y_{t-2}+\phi_{3} y_{t-3}+u_{t},$ where $u_{t} \sim$ iid $N\left(0, \sigma^{2}\right)$\\~\\
+**Sol:**  
+
+d. $\operatorname{ARMA}(2,1): y_{t}=\phi_{1} y_{t-1}+\phi_{2} y_{t-2}+u_{t}+\theta_{1} u_{t-1},$ where $u_{t} \sim$ iid $N\left(0, \sigma^{2}\right)$\\~\\
+**Sol:**  
+
+e. Time varying parameter model:
+$$
+y_{t}=\beta_{1 t}+\beta_{2 t} x_{2 t}+\beta_{3} x_{3 t}+e_{t}
+$$
+
+\\~\\
+**Sol:**  
+
+Question 3. This question is about the problem of spurious regression. It arises when we have non-stationary time-series, which are not cointegrated, and we regress one of these variables on the others. Consider the following two independent random walks:
+$$
+\begin{aligned}
+x_{t}=x_{t-1}+u_{t} & \text { where } u_{t} \sim N(0,1) \\
+y_{t}=y_{t-1}+v_{t} & \text { where } v_{t} \sim N(0,1)
+\end{aligned}
+$$
+a. Simulate 1025 observations for each process. Discard the first 1000 values so that the effects of the star-up condition are washed out. Thus, the sample size is $\mathrm{T}=25 .$ Run a regression of $y_{t}$ on $x_{t} .$ Report the results and discuss the relevant variables.
+b. Repeat the item above 2000 times ( generating different processes each time). For each regression, store the relevant variables. Plot the histogram of each variable.
+
+
+c. How does your results change if change the sample size to $T=100$ and $T=1000 ?$ Briefly discuss how histograms change as sample size increases.
+d. Add a drift to the random walks and repeat item
+b. Briefly discuss the results.
+
+Question 4. [OPTIONAL] Download the Brazilian annual GDP from 19002019 (market prices, $2010=100,$ World Bank website). Apply the logarithm, multiply by 100 and answer the following questions.
+
+a. Run a regression of the GDP on a constant and a time trend. Analyze the residuals. Is GDP trend-stationary?
+b. Do three DF tests: (i) no constant and no trend, (ii) constant but no trend, and (iii) constant and trend. Comment the results.
+c. Do the PP and KPSS tests. Is GDP a unit root process? Compare with item $b$
+
+
